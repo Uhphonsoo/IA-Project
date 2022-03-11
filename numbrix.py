@@ -105,14 +105,27 @@ class Board:
         """ Lê o ficheiro cujo caminho é passado como argumento e retorna
         uma instância da classe Board. """
         # TODO
-        pass
+
+        # Abrir ficheiro e ler conteudo
+        file = open(filename, "r")
+        lines_strings = file.readlines()
+
+        # Coverter linhas de strings para linhas de ints
+        lines_ints = []
+        for line in lines_strings:
+            line_ints = [int(string_number) for string_number in line.split()]
+            lines_ints.append(line_ints)
+
+        # Criar e retornar board
+        board = Board(lines_ints)
+        return board
+
+    # TODO: outros metodos da classe
 
     def validate_row_and_col(self, row, col):
     
         if (row < 0 or row >= self.N or col < 0 or col >= self.N):
             raise Exception("validate_row_and_col: Input incorreto.")
-
-    # TODO: outros metodos da classe
 
 
 class Numbrix(Problem):
@@ -157,20 +170,11 @@ if __name__ == "__main__":
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
 
+    # Obter o nome do ficheiro do command line
     file_name = sys.argv[1]
 
-    # Abrir e ler do ficheiro
-    file = open(file_name, "r")
-    lines_strings = file.readlines()
-
-    # Coverter linhas de strings para linhas de ints
-    lines_ints = []
-    for line in lines_strings:
-        line_ints = [int(number) for number in line.split()]
-        lines_ints.append(line_ints)
-
     # Criar board
-    board = Board(lines_ints)
+    board = Board.parse_instance(file_name)
 
     """ DEBUG """
     print(board.adjacent_vertical_numbers(0,0))
