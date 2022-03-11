@@ -26,6 +26,10 @@ class NumbrixState:
 
 class Board:
     """ Representação interna de um tabuleiro de Numbrix. """
+
+    def __init__(self, lines):
+        self.N = lines[0]
+        self.lines = lines[1:]
     
     def get_number(self, row: int, col: int) -> int:
         """ Devolve o valor na respetiva posição do tabuleiro. """
@@ -95,4 +99,15 @@ if __name__ == "__main__":
     # Usar uma técnica de procura para resolver a instância,
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
-    pass
+
+    file_name = sys.argv[1]
+
+    # Abrir e ler do ficheiro
+    file = open(file_name, "r")
+    lines = file.readlines()
+
+    # Criar board
+    board = Board(lines)
+
+    # Inicializar state
+
