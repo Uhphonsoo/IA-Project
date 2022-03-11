@@ -60,20 +60,20 @@ class Board:
 
         # Caso N == 1
         if self.N == 1:
-            return (-1, -1)
+            return (None, None)
 
         # Caso N > 1
         elif self.N > 1:
 
             # Caso primeira linha
             if row == 0:
-                return (self.get_number(row + 1, col), -1)
+                return (self.get_number(row + 1, col), None)
             # Caso ultima linha
             elif row == self.N - 1:
-                return (-1, self.get_number(row - 1, col))
+                return (None, self.get_number(row - 1, col))
             # Caso linha intermedia
             else:
-                return (self.get_number(row - 1, col), self.get_number(row + 1, col))
+                return (self.get_number(row + 1, col), self.get_number(row - 1, col))
 
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente à esquerda e à direita, 
@@ -85,17 +85,17 @@ class Board:
 
         # Caso N == 1
         if self.N == 1:
-            return (-1, -1)
+            return (None, None)
 
         # Caso N > 1
         elif self.N > 1:
 
             # Caso primeira coluna
             if col == 0:
-                return (-1, self.get_number(row, col + 1))
+                return (None, self.get_number(row, col + 1))
             # Caso ultima coluna
             elif col == self.N - 1:
-                return (self.get_number(row, col - 1), -1)
+                return (self.get_number(row, col - 1), None)
             # Caso coluna intermedia
             else:
                 return (self.get_number(row, col - 1), self.get_number(row, col + 1))
@@ -122,6 +122,12 @@ class Board:
 
     # TODO: outros metodos da classe
 
+    def to_string(self):
+        for line in self.lines:
+            for number in line:
+                print(f"{number}    ", end = '')
+            print()
+
     def validate_row_and_col(self, row, col):
     
         if (row < 0 or row >= self.N or col < 0 or col >= self.N):
@@ -132,7 +138,9 @@ class Numbrix(Problem):
     def __init__(self, board: Board):
         """ O construtor especifica o estado inicial. """
         # TODO
-        pass
+        
+        self.board = board
+        # ... ??? 
 
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
@@ -184,4 +192,14 @@ if __name__ == "__main__":
     print(board.adjacent_horizontal_numbers(0,0))
     print(board.adjacent_horizontal_numbers(1,1))
     print(board.adjacent_horizontal_numbers(2,2))
+
+    # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
+    board = Board.parse_instance("i1.txt")
+    print("Initial:\n", board.to_string(), sep="")
+
+    # Imprimir valores adjacentes
+    print(board.adjacent_vertical_numbers(2, 2))
+    print(board.adjacent_horizontal_numbers(2, 2))
+    print(board.adjacent_vertical_numbers(1, 1))
+    print(board.adjacent_horizontal_numbers(1, 1))
 
