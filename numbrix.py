@@ -28,13 +28,17 @@ class Board:
     """ Representação interna de um tabuleiro de Numbrix. """
 
     def __init__(self, lines):
-        self.N = lines[0]
+
+        # a primeira linha de linhas e' da forma [N]
+        self.N = lines[0][0]
+
         self.lines = lines[1:]
     
     def get_number(self, row: int, col: int) -> int:
         """ Devolve o valor na respetiva posição do tabuleiro. """
         # TODO
-        pass
+
+        return self.lines[row][col]
     
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente abaixo e acima, 
@@ -104,10 +108,16 @@ if __name__ == "__main__":
 
     # Abrir e ler do ficheiro
     file = open(file_name, "r")
-    lines = file.readlines()
+    lines_strings = file.readlines()
+
+    # Coverter linhas de strings para linhas de ints
+    lines_ints = []
+    for line in lines_strings:
+        line_ints = [int(number) for number in line.split()]
+        lines_ints.append(line_ints)
 
     # Criar board
-    board = Board(lines)
+    board = Board(lines_ints)
 
-    # Inicializar state
+    print(board.get_number(1,1))
 
