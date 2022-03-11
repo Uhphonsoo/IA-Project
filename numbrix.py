@@ -30,13 +30,23 @@ class Board:
     def __init__(self, lines):
 
         # a primeira linha de linhas e' da forma [N]
-        self.N = lines[0][0]
+        N = lines[0][0]
 
+        # Validar input
+        if N < 1:
+            raise Exception("N deve ser maior ou igual a 1.")
+        if len(lines) != N + 1:
+            raise Exception("O input nao tem o numero correto de linhas.")
+
+        self.N = N
         self.lines = lines[1:]
     
     def get_number(self, row: int, col: int) -> int:
         """ Devolve o valor na respetiva posição do tabuleiro. """
         # TODO
+
+        # Validar input
+        self.validate_row_and_col(row, col)
 
         return self.lines[row][col]
     
@@ -44,13 +54,51 @@ class Board:
         """ Devolve os valores imediatamente abaixo e acima, 
         respectivamente. """
         # TODO
-        pass
-    
+
+        # Testar input
+        self.validate_row_and_col(row, col)
+
+        # Caso N == 1
+        if self.N == 1:
+            return (-1, -1)
+
+        # Caso N > 1
+        elif self.N > 1:
+
+            # Caso primeira linha
+            if row == 0:
+                return (self.get_number(row + 1, col), -1)
+            # Caso ultima linha
+            elif row == self.N - 1:
+                return (-1, self.get_number(row - 1, col))
+            # Caso linha intermedia
+            else:
+                return (self.get_number(row - 1, col), self.get_number(row + 1, col))
+
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente à esquerda e à direita, 
         respectivamente. """
         # TODO
-        pass
+
+        # Testar input
+        self.validate_row_and_col(row, col)
+
+        # Caso N == 1
+        if self.N == 1:
+            return (-1, -1)
+
+        # Caso N > 1
+        elif self.N > 1:
+
+            # Caso primeira coluna
+            if col == 0:
+                return (-1, self.get_number(row, col + 1))
+            # Caso ultima coluna
+            elif col == self.N - 1:
+                return (self.get_number(row, col - 1), -1)
+            # Caso coluna intermedia
+            else:
+                return (self.get_number(row, col - 1), self.get_number(row, col + 1))
     
     @staticmethod    
     def parse_instance(filename: str):
@@ -58,6 +106,11 @@ class Board:
         uma instância da classe Board. """
         # TODO
         pass
+
+    def validate_row_and_col(self, row, col):
+    
+        if (row < 0 or row >= self.N or col < 0 or col >= self.N):
+            raise Exception("validate_row_and_col: Input incorreto.")
 
     # TODO: outros metodos da classe
 
@@ -119,5 +172,12 @@ if __name__ == "__main__":
     # Criar board
     board = Board(lines_ints)
 
-    print(board.get_number(1,1))
+    """ DEBUG """
+    print(board.adjacent_vertical_numbers(0,0))
+    print(board.adjacent_vertical_numbers(1,1))
+    print(board.adjacent_vertical_numbers(2,2))
+
+    print(board.adjacent_horizontal_numbers(0,0))
+    print(board.adjacent_horizontal_numbers(1,1))
+    print(board.adjacent_horizontal_numbers(2,2))
 
