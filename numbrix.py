@@ -43,7 +43,7 @@ class Board:
     
     def get_number(self, row: int, col: int) -> int:
         """ Devolve o valor na respetiva posição do tabuleiro. """
-        # TODO
+        # TO~DO
 
         # Validar input
         self.validate_row_and_col(row, col)
@@ -53,7 +53,7 @@ class Board:
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente abaixo e acima, 
         respectivamente. """
-        # TODO
+        # TO~DO
 
         # Testar input
         self.validate_row_and_col(row, col)
@@ -78,7 +78,7 @@ class Board:
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente à esquerda e à direita, 
         respectivamente. """
-        # TODO
+        # TO~DO
 
         # Testar input
         self.validate_row_and_col(row, col)
@@ -104,7 +104,7 @@ class Board:
     def parse_instance(filename: str):
         """ Lê o ficheiro cujo caminho é passado como argumento e retorna
         uma instância da classe Board. """
-        # TODO
+        # TO~DO
 
         # Abrir ficheiro e ler conteudo
         file = open(filename, "r")
@@ -121,6 +121,43 @@ class Board:
         return board
 
     # TODO: outros metodos da classe
+
+    def getBlankPositionsAdjacentToValues(self):
+        """ Retorna uma lista em que cada elemento e' composto por uma 
+        posicao vazia que esteja adjacente a pelo menos uma posicao nao
+        vazia (posicao com um valor) e por o conjunto de valores que 
+        lhe sao adjacentes """
+
+        blankPositionsAdjacentToValues = []
+
+        for line in range(self.N):
+            for col in range(self.N):
+                adjacentValuesOfThisPosition = set()
+
+                if self.lines[line][col] != 0: # se a posicao nao esta vazia
+                    continue
+                else:
+                    adjacentToNonBlankPosition = False
+                    verticalAdjacentValues = self.adjacent_vertical_numbers(line, col)
+                    horizontalAdjacentValues = self.adjacent_horizontal_numbers(line, col)
+
+                    for verticalValue in verticalAdjacentValues:
+                        if verticalValue != 0 and verticalValue != None:
+                            adjacentToNonBlankPosition = True
+                            adjacentValuesOfThisPosition.add(verticalValue)
+
+                    for horizontalValue in horizontalAdjacentValues:
+                        if horizontalValue != 0 and horizontalValue != None:
+                            adjacentToNonBlankPosition = True
+                            adjacentValuesOfThisPosition.add(horizontalValue)
+                    
+                    if adjacentToNonBlankPosition:
+                        blankPositionsAdjacentToValues.append([(line, col), adjacentValuesOfThisPosition])
+                        
+        return blankPositionsAdjacentToValues
+
+                    
+
 
     def to_string(self):
         for line in self.lines:
@@ -147,6 +184,21 @@ class Numbrix(Problem):
         partir do estado passado como argumento. """
         # TODO
         pass
+
+        """ actionsResult = []
+
+        adjacentPositions = self.board.getBlankPositionsAdjacentToValues
+
+        for position in adjacentPositions:
+            adjacentValues = getValuesAdjacentToPositions(self.board)
+            possibleValues = getPossibleValues(position, adjacentValues)
+
+            for possibleValue in possibleValues:
+                action = createAction(position, possibleValue)
+            
+                actionsResult.append(action)
+
+        return actionsResult """
 
     def result(self, state: NumbrixState, action):
         """ Retorna o estado resultante de executar a 'action' sobre
@@ -179,20 +231,12 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
 
     # Obter o nome do ficheiro do command line
-    file_name = sys.argv[1]
+    """ file_name = sys.argv[1] """
 
     # Criar board
-    board = Board.parse_instance(file_name)
+    """ board = Board.parse_instance(file_name) """
 
-    """ DEBUG """
-    print(board.adjacent_vertical_numbers(0,0))
-    print(board.adjacent_vertical_numbers(1,1))
-    print(board.adjacent_vertical_numbers(2,2))
-
-    print(board.adjacent_horizontal_numbers(0,0))
-    print(board.adjacent_horizontal_numbers(1,1))
-    print(board.adjacent_horizontal_numbers(2,2))
-
+    # Exemplo 1
     # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
     board = Board.parse_instance("i1.txt")
     print("Initial:\n", board.to_string(), sep="")
@@ -203,3 +247,22 @@ if __name__ == "__main__":
     print(board.adjacent_vertical_numbers(1, 1))
     print(board.adjacent_horizontal_numbers(1, 1))
 
+    blankPositionsAdjacentToValues = board.getBlankPositionsAdjacentToValues()
+
+    for element in blankPositionsAdjacentToValues:
+        print(element)
+
+
+    """ # Exemplo 2
+    # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
+    board = Board.parse_instance("i1.txt") # Criar uma instância de Numbrix:
+    problem = Numbrix(board)
+
+    # Criar um estado com a configuração inicial:
+    initial_state = NumbrixState(board) # Mostrar valor na posição (2, 2):
+    print(initial_state.board.get_number(2, 2))
+
+    # Realizar acção de inserir o número 1 na posição (2, 2) """
+    # TODO
+    """ result_state = problem.result(initial_state, (2, 2, 1)) # Mostrar valor na posição (2, 2):
+    print(result_state.board.get_number(2, 2)) """
