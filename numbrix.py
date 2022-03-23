@@ -23,6 +23,26 @@ class NumbrixState:
         
     # TODO: outros metodos da classe
 
+    def getBlankPositionsAdjacentToValues(self):
+        return self.board.getBlankPositionsAdjacentToValues()
+
+    def getPossibleValues(self, adjacentValues):
+
+        possibleValues = []
+        filledValues = self.board.getFilledValues()
+
+        for i in range(1,10):
+            if i not in adjacentValues and i not in filledValues:
+                possibleValues.append(i)
+
+    def setBoardValue(self, row, col, value):
+
+        return NumbrixState(self.board.setValue(row, col, value)) 
+
+
+    """ def getValuesAdjacentToPositions():
+        return self.board.getValuesAdjacentToPositions() """
+
 
 class Board:
     """ Representação interna de um tabuleiro de Numbrix. """
@@ -156,8 +176,24 @@ class Board:
                         
         return blankPositionsAdjacentToValues
 
-                    
+    def getFilledValues(self):
 
+        filledValues = []
+        
+        for line in self.lines:
+            for element in line:
+                if element != 0:
+                    filledValues.append(element)
+
+        return filledValues
+
+    def setValue(self, row, col, value):
+        self.lines[row][col] = value
+        return self
+
+
+    """ def getValuesAdjacentToPositions(self):
+        pass """ # acho que nao preciso (???)
 
     def to_string(self):
         for line in self.lines:
@@ -174,10 +210,9 @@ class Board:
 class Numbrix(Problem):
     def __init__(self, board: Board):
         """ O construtor especifica o estado inicial. """
-        # TODO
+        # TODO # esta' feito???
         
-        self.board = board
-        # ... ??? 
+        self.state = NumbrixState(board)
 
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
@@ -185,28 +220,39 @@ class Numbrix(Problem):
         # TODO
         pass
 
-        """ actionsResult = []
+        actionsResult = []
 
-        adjacentPositions = self.board.getBlankPositionsAdjacentToValues
+        positionsAdjacentToValues = self.state.getBlankPositionsAdjacentToValues()
 
-        for position in adjacentPositions:
-            adjacentValues = getValuesAdjacentToPositions(self.board)
-            possibleValues = getPossibleValues(position, adjacentValues)
+        for element in positionsAdjacentToValues:
+            position = element[0]
+            adjacentValues = element[1]
+
+            possibleValues = self.state.getPossibleValues(adjacentValues)
 
             for possibleValue in possibleValues:
-                action = createAction(position, possibleValue)
-            
+
+                action = self.createAction(position, possibleValue)
                 actionsResult.append(action)
 
-        return actionsResult """
+        return actionsResult
+
+    def createAction(self, position, possibleValue):
+        return (position[0], position[1], possibleValue)
 
     def result(self, state: NumbrixState, action):
         """ Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de 
         self.actions(state). """
-        # TODO
-        pass
+
+        # TO~DO
+
+        row = action[0]
+        col = action[1]
+        value = action[2]
+
+        return state.setBoardValue(row, col, value)
 
     def goal_test(self, state: NumbrixState):
         """ Retorna True se e só se o estado passado como argumento é
@@ -238,7 +284,7 @@ if __name__ == "__main__":
 
     # Exemplo 1
     # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    board = Board.parse_instance("i1.txt")
+    """ board = Board.parse_instance("i1.txt")
     print("Initial:\n", board.to_string(), sep="")
 
     # Imprimir valores adjacentes
@@ -250,19 +296,25 @@ if __name__ == "__main__":
     blankPositionsAdjacentToValues = board.getBlankPositionsAdjacentToValues()
 
     for element in blankPositionsAdjacentToValues:
-        print(element)
+        print(element) """
 
 
-    """ # Exemplo 2
+    # Exemplo 2 # falta confirmar !!!!
     # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    board = Board.parse_instance("i1.txt") # Criar uma instância de Numbrix:
-    problem = Numbrix(board)
+    board = Board.parse_instance("i1.txt") 
+
+    # Criar uma instância de Numbrix:
+    problem = Numbrix(board) # esta feito???
 
     # Criar um estado com a configuração inicial:
-    initial_state = NumbrixState(board) # Mostrar valor na posição (2, 2):
+    initial_state = NumbrixState(board) 
+
+    # Mostrar valor na posição (2, 2):
     print(initial_state.board.get_number(2, 2))
 
-    # Realizar acção de inserir o número 1 na posição (2, 2) """
+    # Realizar acção de inserir o número 1 na posição (2, 2)
     # TODO
-    """ result_state = problem.result(initial_state, (2, 2, 1)) # Mostrar valor na posição (2, 2):
-    print(result_state.board.get_number(2, 2)) """
+    result_state = problem.result(initial_state, (2, 2, 1)) 
+
+    # Mostrar valor na posição (2, 2):
+    print(result_state.board.get_number(2, 2))
