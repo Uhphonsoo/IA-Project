@@ -36,8 +36,11 @@ class NumbrixState:
                 possibleValues.append(i)
 
     def setBoardValue(self, row, col, value):
-
         return NumbrixState(self.board.setValue(row, col, value)) 
+
+    def to_string(self):
+        """ id_string = str(self.id) """
+        return("board:\n" + self.board.to_string() + "\nid:\n" + str(self.id))
 
 
     """ def getValuesAdjacentToPositions():
@@ -195,16 +198,21 @@ class Board:
     """ def getValuesAdjacentToPositions(self):
         pass """ # acho que nao preciso (???)
 
-    def to_string(self):
-        for line in self.lines:
-            for number in line:
-                print(f"{number}    ", end = '')
-            print()
-
     def validate_row_and_col(self, row, col):
     
         if (row < 0 or row >= self.N or col < 0 or col >= self.N):
             raise Exception("validate_row_and_col: Input incorreto.")
+
+    def to_string(self):
+        board_string = ""
+
+        for line in self.lines:
+            for number in line:
+                board_string += str(number) + "    "
+            if line != self.lines[-1]:
+                board_string += "\n"
+        
+        return board_string
 
 
 class Numbrix(Problem):
@@ -283,8 +291,8 @@ if __name__ == "__main__":
     """ board = Board.parse_instance(file_name) """
 
     # Exemplo 1
-    # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    """ board = Board.parse_instance("i1.txt")
+    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
+    board = Board.parse_instance("i1.txt")
     print("Initial:\n", board.to_string(), sep="")
 
     # Imprimir valores adjacentes
@@ -299,8 +307,8 @@ if __name__ == "__main__":
         print(element) """
 
 
-    # Exemplo 2 # falta confirmar !!!!
-    # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
+    # Exemplo 2
+    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
     board = Board.parse_instance("i1.txt") 
 
     # Criar uma instância de Numbrix:
@@ -313,8 +321,9 @@ if __name__ == "__main__":
     print(initial_state.board.get_number(2, 2))
 
     # Realizar acção de inserir o número 1 na posição (2, 2)
-    # TODO
     result_state = problem.result(initial_state, (2, 2, 1)) 
 
     # Mostrar valor na posição (2, 2):
-    print(result_state.board.get_number(2, 2))
+    print(result_state.board.get_number(2, 2)) """
+
+    
