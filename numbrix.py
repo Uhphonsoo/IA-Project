@@ -203,6 +203,40 @@ class Board:
         if (row < 0 or row >= self.N or col < 0 or col >= self.N):
             raise Exception("validate_row_and_col: Input incorreto.")
 
+    def goal_test(self):
+
+        goal = True
+
+        for row in range(self.N):
+            for col in range(self.N):
+                horizontal_adjacent_numbers = self.adjacent_horizontal_numbers(row, col)
+                vertical_adjacent_numbers = self.adjacent_vertical_numbers(row, col)
+
+                if not self.at_least_one_adjacent_number_is_sequential(self.lines[row][col], horizontal_adjacent_numbers, vertical_adjacent_numbers):
+                    goal = False
+
+        return goal
+
+    def at_least_one_adjacent_number_is_sequential(self, current_number, horizontal_adjacent_numbers, vertical_adjacent_numbers):
+
+        at_least_one_adjacent_is_sequential = False
+
+        if current_number < 1 or current_number > self.N ** 2:
+            raise Exception("Input incorreto.")
+
+        for number in horizontal_adjacent_numbers:
+            if number != None:
+                if number == current_number + 1 or number == current_number - 1:
+                    at_least_one_adjacent_is_sequential = True
+
+        for number in vertical_adjacent_numbers:
+            if number != None:
+                if number == current_number + 1 or number == current_number - 1:
+                    at_least_one_adjacent_is_sequential = True
+
+        return at_least_one_adjacent_is_sequential
+
+
     def to_string(self):
         board_string = ""
 
@@ -267,7 +301,8 @@ class Numbrix(Problem):
         um estado objetivo. Deve verificar se todas as posições do tabuleiro 
         estão preenchidas com uma sequência de números adjacentes. """
         # TODO
-        pass
+
+        return state.board.goal_test()
 
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
@@ -326,4 +361,27 @@ if __name__ == "__main__":
     # Mostrar valor na posição (2, 2):
     print(result_state.board.get_number(2, 2)) """
 
+
+    # Exemplo 3
+    # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
+    board = Board.parse_instance("i1.txt") 
     
+    # Criar uma instância de Numbrix:
+    problem = Numbrix(board)
+
+    # Criar um estado com a configuração inicial:
+    s0 = NumbrixState(board)
+    print("Initial:\n", s0.board.to_string(), sep="")
+
+    # Aplicar as ações que resolvem a instância
+    s1 = problem.result(s0, (2, 2, 1))
+    s2 = problem.result(s1, (0, 2, 3))
+    s3 = problem.result(s2, (0, 1, 4))
+    s4 = problem.result(s3, (1, 1, 5))
+    s5 = problem.result(s4, (2, 0, 7))
+    s6 = problem.result(s5, (1, 0, 8))
+    s7 = problem.result(s6, (0, 0, 9))
+
+    # Verificar se foi atingida a solução
+    print("Is goal?", problem.goal_test(s7))
+    print("Solution:\n", s7.board.to_string(), sep="")
