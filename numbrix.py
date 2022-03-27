@@ -26,14 +26,20 @@ class NumbrixState:
     def getBlankPositionsAdjacentToValues(self):
         return self.board.getBlankPositionsAdjacentToValues()
 
-    def getPossibleValues(self, adjacentValues):
+    def getPossibleValues(self, position, adjacentValues):
 
         possibleValues = []
         filledValues = self.board.getFilledValues()
+        """ vertical_blank_positions = self.board.adjacent_vertical_positions(position)
+        horizontal_blank_positions = self.board.adjacent_horizontal_positions(position) """
 
+        # TODO: make it so that it returns all values possible for that 
+        # position rather than all values remaining for the board
         for i in range(1,10):
             if i not in adjacentValues and i not in filledValues:
                 possibleValues.append(i)
+
+        return possibleValues
 
     def setBoardValue(self, row, col, value):
         return NumbrixState(self.board.setValue(row, col, value)) 
@@ -122,7 +128,7 @@ class Board:
             # Caso coluna intermedia
             else:
                 return (self.get_number(row, col - 1), self.get_number(row, col + 1))
-    
+
     @staticmethod    
     def parse_instance(filename: str):
         """ Lê o ficheiro cujo caminho é passado como argumento e retorna
@@ -144,6 +150,31 @@ class Board:
         return board
 
     # TODO: outros metodos da classe
+
+    def adjacent_vertical_positions(self, position): #TODO
+
+        row = position[0]
+        col = position[1]
+
+        # Testar input
+        self.validate_row_and_col(row, col)
+
+
+
+    def adjacent_horizontal_positions(self, position): #TODO
+
+        row = position[0]
+        col = position[1]
+
+        # Testar input
+        self.validate_row_and_col(row, col)
+
+        if row == 0 and col == 0:
+            return (self.lines[0][1], self.lines[1][0])
+        
+
+
+        
 
     def getBlankPositionsAdjacentToValues(self):
         """ Retorna uma lista em que cada elemento e' composto por uma 
@@ -212,6 +243,10 @@ class Board:
                 horizontal_adjacent_numbers = self.adjacent_horizontal_numbers(row, col)
                 vertical_adjacent_numbers = self.adjacent_vertical_numbers(row, col)
 
+                # if a single position is empty then this is not a goal state
+                if self.lines[row][col] == 0:
+                    return False
+
                 if not self.at_least_one_adjacent_number_is_sequential(self.lines[row][col], horizontal_adjacent_numbers, vertical_adjacent_numbers):
                     goal = False
 
@@ -222,7 +257,7 @@ class Board:
         at_least_one_adjacent_is_sequential = False
 
         if current_number < 1 or current_number > self.N ** 2:
-            raise Exception("Input incorreto.")
+            raise Exception("at_least_one_adjacent_number_is_sequential: Input incorreto.")
 
         for number in horizontal_adjacent_numbers:
             if number != None:
@@ -236,6 +271,29 @@ class Board:
 
         return at_least_one_adjacent_is_sequential
 
+    def get_number_of_blank_positions(self):
+
+        number_of_blank_positions = 0
+
+        for line in self.lines:
+            for number in line:
+                if number == 0:
+                    number_of_blank_positions += 1
+
+        return number_of_blank_positions
+
+    """ def get_blank_positions_adjacent_to_position(self, position):
+
+        blank_positions = []
+        horizontal_positions = board.adjacent_horizontal_numbers(position[0], position[1])
+        vertical_positions = board.adjacent_horizontal_numbers(position[0], position[1])
+
+        for position in vertical_positions:
+
+
+
+
+        return blank_positions """
 
     def to_string(self):
         board_string = ""
@@ -254,13 +312,14 @@ class Numbrix(Problem):
         """ O construtor especifica o estado inicial. """
         # TODO # esta' feito???
         
-        self.state = NumbrixState(board)
+        self.initial = NumbrixState(board)
+        """ self.state = NumbrixState(board) """
+        self.state = self.initial
 
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento. """
         # TODO
-        pass
 
         actionsResult = []
 
@@ -270,7 +329,10 @@ class Numbrix(Problem):
             position = element[0]
             adjacentValues = element[1]
 
-            possibleValues = self.state.getPossibleValues(adjacentValues)
+            possibleValues = self.state.getPossibleValues(position, adjacentValues)
+
+            """ DEBUG """
+            print(f"> {possibleValues}")
 
             for possibleValue in possibleValues:
 
@@ -300,14 +362,19 @@ class Numbrix(Problem):
         """ Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro 
         estão preenchidas com uma sequência de números adjacentes. """
-        # TODO
+        # TO~DO
+
+        """ DEBUG """
+        print(state.to_string())
 
         return state.board.goal_test()
 
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
         # TODO
-        pass
+        # heuristica 1: numero de posicoes vazias
+
+        return node.state.board.get_number_of_blank_positions()
     
     # TODO: outros metodos da classe
 
@@ -363,7 +430,7 @@ if __name__ == "__main__":
 
 
     # Exemplo 3
-    # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
+    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
     board = Board.parse_instance("i1.txt") 
     
     # Criar uma instância de Numbrix:
@@ -384,4 +451,31 @@ if __name__ == "__main__":
 
     # Verificar se foi atingida a solução
     print("Is goal?", problem.goal_test(s7))
-    print("Solution:\n", s7.board.to_string(), sep="")
+    print("Solution:\n", s7.board.to_string(), sep="") """
+
+
+    # Exemplo 4
+    # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
+    board = Board.parse_instance("i1.txt") 
+
+    # Criar uma instância de Numbrix:
+    problem = Numbrix(board)
+
+    # Obter o nó solução usando a procura A*:
+    goal_node = astar_search(problem) #TODO isto esta' a retornar None
+
+    # Verificar se foi atingida a solução
+    print("Is goal?", problem.goal_test(goal_node.state))
+    print("Solution:\n", goal_node.state.board.to_string(), sep="")
+
+    # DEBUG
+    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
+    board = Board.parse_instance("i1.txt") 
+
+    # Criar uma instância de Numbrix:
+    problem = Numbrix(board)
+
+    actions = problem.actions(problem.state)
+
+    for action in actions:
+        print(action) """
