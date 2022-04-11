@@ -26,6 +26,41 @@ class NumbrixState:
     def getBlankPositionsAdjacentToValues(self):
         return self.board.getBlankPositionsAdjacentToValues()
 
+    def get_blank_positions_adjacent_to_position(self, position):
+        row = position[0]
+        col = position[1]
+        blank_positions = []
+
+        # [row-1][col], [row][col-1], [row][col+1] [row+1][col]
+        if row-1 >= 0:
+            if self.board.lines[row-1][col] == 0:
+                blank_positions.append([row-1, col])
+        if col-1 >= 0:    
+            if self.board.lines[row][col-1] == 0:
+                blank_positions.append([row, col-1])
+        if col+1 < self.board.N:
+            if self.board.lines[row][col+1] == 0:
+                blank_positions.append([row, col+1])
+        if row+1 < self.board.N:
+            if self.board.lines[row+1][col] == 0:
+                blank_positions.append([row+1, col])
+
+        return blank_positions
+
+    def get_number_of_blank_positions_adjacent_to_position(self, position):
+        return len(self.get_blank_positions_adjacent_to_position(position))
+
+
+    def get_sequential_values(self, adjacent_values):
+
+        result = []
+        for value in adjacent_values:
+            if value + 1 < 10:
+                result.append(value + 1)
+            if value - 1 > 0:
+                result.append(value - 1)
+        return result
+
     def getPossibleValues(self, position, adjacentValues):
 
         possibleValues = []
@@ -35,9 +70,17 @@ class NumbrixState:
 
         # TODO: make it so that it returns all values possible for that 
         # position rather than all values remaining for the board
+        number_of_blank_adjacent_positions = self.get_number_of_blank_positions_adjacent_to_position(position)
+        
         for i in range(1,10):
-            if i not in adjacentValues and i not in filledValues:
-                possibleValues.append(i)
+            sequential_values = self.get_sequential_values(adjacentValues)
+
+            if (number_of_blank_adjacent_positions == 0):
+                if i in sequential_values and i not in filledValues:
+                    possibleValues.append(i)
+            else:
+                if i not in adjacentValues and i not in filledValues:
+                    possibleValues.append(i)
 
         return possibleValues
 
@@ -47,7 +90,7 @@ class NumbrixState:
     def to_string(self):
         """ id_string = str(self.id) """
         return("board:\n" + self.board.to_string() + "\nid:\n" + str(self.id))
-
+            
 
     """ def getValuesAdjacentToPositions():
         return self.board.getValuesAdjacentToPositions() """
