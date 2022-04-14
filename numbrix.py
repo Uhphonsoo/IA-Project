@@ -6,7 +6,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v1
+#v3
 
 import sys
 import copy
@@ -59,9 +59,10 @@ class NumbrixState:
 
     def get_sequential_values(self, adjacent_values):
 
+        max = self.board.N ** 2
         result = []
         for value in adjacent_values:
-            if value + 1 < 10:
+            if value + 1 < max + 1:
                 result.append(value + 1)
             if value - 1 > 0:
                 result.append(value - 1)
@@ -76,7 +77,8 @@ class NumbrixState:
 
         number_of_blank_adjacent_positions = self.get_number_of_blank_positions_adjacent_to_position(position)
 
-        for i in range(1,10):
+        max = self.board.N ** 2
+        for i in range(1, max+1):
             sequential_values = self.get_sequential_values(adjacentValues)
 
             """ if (number_of_blank_adjacent_positions == 0): """
@@ -370,7 +372,9 @@ class Board:
 
         for line in self.lines:
             for number in line:
-                board_string += str(number) + "     "
+                board_string += str(number)
+                if number != line[-1]:
+                    board_string += '\t'
             if line != self.lines[-1]:
                 board_string += "\n"
         
@@ -380,6 +384,12 @@ class Board:
 
         blank_positions = self.getBlankPositionsAdjacentToValues()
         return len(blank_positions)
+
+    """ def get_total_number_of_blank_adjacent_positions_and_actions(self, state):
+
+        blank_positions = self.getBlankPositionsAdjacentToValues()
+        actions = state.
+        return len(blank_positions) """
 
 
 
@@ -462,7 +472,19 @@ class Numbrix(Problem):
         """ return node.state.board.get_number_of_blank_positions() """
 
         # heuristica 2: numero total de posicoes adjacentes vazias
-        return node.state.board.get_total_number_of_blank_adjacent_positions()
+        #return node.state.board.get_total_number_of_blank_adjacent_positions()
+
+        # heuristica 3: numero total de posicoes adjacentes vazias
+        return self.get_total_number_of_blank_adjacent_positions_and_actions(node)
+
+    def get_total_number_of_blank_adjacent_positions_and_actions(self, node):
+
+        number_of_blank_adjacent_positions = node.state.board.get_total_number_of_blank_adjacent_positions()
+
+        actions = self.actions(node.state)
+        number_of_actions = len(actions)
+
+        return number_of_blank_adjacent_positions + number_of_actions
     
     # TODO: outros metodos da classe
 
@@ -557,14 +579,20 @@ if __name__ == "__main__":
     print("Solution:\n", goal_node.state.board.to_string(), sep="") """
 
     # Moosh
-    # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    board = Board.parse_instance("./tests_final_public/input2.txt") 
+    input_file = sys.argv[1]
+    #input_file = "tests_final_public/input2.txt"
+    
+    # Ler tabuleiro do ficheiro input_file:
+    board = Board.parse_instance(input_file) 
 
     # Criar uma instância de Numbrix:
     problem = Numbrix(board)
 
     # Obter o nó solução usando a procura A*:
     goal_node = astar_search(problem)
+    #goal_node = greedy_search(problem)
+    # goal_node = breadth_first_tree_search(problem)
+    # goal_node = depth_first_tree_search(problem)
 
     # Verificar se foi atingida a solução
     """ print("Is goal?", problem.goal_test(goal_node.state))
