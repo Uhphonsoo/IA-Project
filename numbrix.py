@@ -1,7 +1,3 @@
-# numbrix.py: Template para implementação do projeto de Inteligência Artificial 2021/2022.
-# Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
-# Além das funções e classes já definidas, podem acrescentar outras que considerem pertinentes.
-
 # Grupo 39:
 # 90398 Joao Silva
 # 95633 Maria Varanda
@@ -23,39 +19,9 @@ class NumbrixState:
 
     def __lt__(self, other):
         return self.id < other.id
-        
-    # TODO: outros metodos da classe
 
-    def setBoard(self, board):
-        self.board = board
-
-    def getBlankPositionsAdjacentToValues(self):
-        return self.board.getBlankPositionsAdjacentToValues()
-
-    def get_blank_positions_adjacent_to_position(self, position):
-        row = position[0]
-        col = position[1]
-        blank_positions = []
-
-        # [row-1][col], [row][col-1], [row][col+1] [row+1][col]
-        if row-1 >= 0:
-            if self.board.lines[row-1][col] == 0:
-                blank_positions.append([row-1, col])
-        if col-1 >= 0:    
-            if self.board.lines[row][col-1] == 0:
-                blank_positions.append([row, col-1])
-        if col+1 < self.board.N:
-            if self.board.lines[row][col+1] == 0:
-                blank_positions.append([row, col+1])
-        if row+1 < self.board.N:
-            if self.board.lines[row+1][col] == 0:
-                blank_positions.append([row+1, col])
-
-        return blank_positions
-
-    def get_number_of_blank_positions_adjacent_to_position(self, position):
-        return len(self.get_blank_positions_adjacent_to_position(position))
-
+    def get_blank_positions_adjacent_to_values(self):
+        return self.board.get_blank_positions_adjacent_to_values()
 
     def get_sequential_values(self, adjacent_values):
 
@@ -68,38 +34,25 @@ class NumbrixState:
                 result.append(value - 1)
         return result
 
-    def getPossibleValues(self, position, adjacentValues):
+    def get_possible_values(self, position, adjacentValues):
 
         possibleValues = []
-        filledValues = self.board.getFilledValues()
-        """ vertical_blank_positions = self.board.adjacent_vertical_positions(position)
-        horizontal_blank_positions = self.board.adjacent_horizontal_positions(position) """
-
-        number_of_blank_adjacent_positions = self.get_number_of_blank_positions_adjacent_to_position(position)
+        filledValues = self.board.get_filled_values()
 
         max = self.board.N ** 2
         for i in range(1, max+1):
             sequential_values = self.get_sequential_values(adjacentValues)
 
-            """ if (number_of_blank_adjacent_positions == 0): """
             if i in sequential_values and i not in filledValues:
                 possibleValues.append(i)
-            """ else:
-                if i not in adjacentValues and i not in filledValues:
-                    possibleValues.append(i) """
 
         return possibleValues
 
-    def setBoardValue(self, row, col, value):
-        return NumbrixState(self.board.setValue(row, col, value)) 
+    def set_board_value(self, row, col, value):
+        return NumbrixState(self.board.set_value(row, col, value)) 
 
     def to_string(self):
-        """ id_string = str(self.id) """
         return("board:\n" + self.board.to_string() + "\nid:\n" + str(self.id))
-            
-
-    """ def getValuesAdjacentToPositions():
-        return self.board.getValuesAdjacentToPositions() """
 
 
 class Board:
@@ -121,7 +74,6 @@ class Board:
     
     def get_number(self, row: int, col: int) -> int:
         """ Devolve o valor na respetiva posição do tabuleiro. """
-        # TO~DO
 
         # Validar input
         self.validate_row_and_col(row, col)
@@ -131,7 +83,6 @@ class Board:
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente abaixo e acima, 
         respectivamente. """
-        # TO~DO
 
         # Testar input
         self.validate_row_and_col(row, col)
@@ -156,7 +107,6 @@ class Board:
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente à esquerda e à direita, 
         respectivamente. """
-        # TO~DO
 
         # Testar input
         self.validate_row_and_col(row, col)
@@ -182,7 +132,6 @@ class Board:
     def parse_instance(filename: str):
         """ Lê o ficheiro cujo caminho é passado como argumento e retorna
         uma instância da classe Board. """
-        # TO~DO
 
         # Abrir ficheiro e ler conteudo
         file = open(filename, "r")
@@ -197,29 +146,8 @@ class Board:
         # Criar e retornar board
         board = Board(lines_ints)
         return board
-
-    # TODO: outros metodos da classe
-
-    def adjacent_vertical_positions(self, position): #TODO
-
-        row = position[0]
-        col = position[1]
-
-        # Testar input
-        self.validate_row_and_col(row, col)
-
-    def adjacent_horizontal_positions(self, position): #TODO
-
-        row = position[0]
-        col = position[1]
-
-        # Testar input
-        self.validate_row_and_col(row, col)
-
-        if row == 0 and col == 0:
-            return (self.lines[0][1], self.lines[1][0])
         
-    def getBlankPositionsAdjacentToValues(self):
+    def get_blank_positions_adjacent_to_values(self):
         """ Retorna uma lista em que cada elemento e' composto por uma 
         posicao vazia que esteja adjacente a pelo menos uma posicao nao
         vazia (posicao com um valor) e por o conjunto de valores que 
@@ -253,7 +181,7 @@ class Board:
                         
         return blankPositionsAdjacentToValues
 
-    def getFilledValues(self):
+    def get_filled_values(self):
 
         filledValues = []
         
@@ -264,13 +192,9 @@ class Board:
 
         return filledValues
 
-    def setValue(self, row, col, value):
+    def set_value(self, row, col, value):
         self.lines[row][col] = value
         return self
-
-
-    """ def getValuesAdjacentToPositions(self):
-        pass """ # acho que nao preciso (???)
 
     def validate_row_and_col(self, row, col):
     
@@ -347,7 +271,7 @@ class Board:
 
         return at_least_one_adjacent_is_sequential
 
-    def get_number_of_blank_positions(self):
+    """ def get_number_of_blank_positions(self):
 
         number_of_blank_positions = 0
 
@@ -356,16 +280,7 @@ class Board:
                 if number == 0:
                     number_of_blank_positions += 1
 
-        return number_of_blank_positions
-
-    """ def get_blank_positions_adjacent_to_position(self, position):
-
-        blank_positions = []
-        horizontal_positions = board.adjacent_horizontal_numbers(position[0], position[1])
-        vertical_positions = board.adjacent_horizontal_numbers(position[0], position[1])
-
-        for position in vertical_positions:
-        return blank_positions """
+        return number_of_blank_positions """
 
     def to_string(self):
         board_string = ""
@@ -382,53 +297,32 @@ class Board:
 
     def get_total_number_of_blank_adjacent_positions(self):
 
-        blank_positions = self.getBlankPositionsAdjacentToValues()
+        blank_positions = self.get_blank_positions_adjacent_to_values()
         return len(blank_positions)
-
-    """ def get_total_number_of_blank_adjacent_positions_and_actions(self, state):
-
-        blank_positions = self.getBlankPositionsAdjacentToValues()
-        actions = state.
-        return len(blank_positions) """
-
 
 
 class Numbrix(Problem):
     def __init__(self, board: Board):
         """ O construtor especifica o estado inicial. """
-        # TODO # esta' feito???
-        
         self.initial = copy.deepcopy(NumbrixState(board))
-        """ self.state = NumbrixState(board) """
-        """ self.state = NumbrixState(board) """
 
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento. """
-        # TODO
 
         actionsResult = []
-
-        positionsAdjacentToValues = state.getBlankPositionsAdjacentToValues()
+        positionsAdjacentToValues = state.get_blank_positions_adjacent_to_values()
 
         for element in positionsAdjacentToValues:
             position = element[0]
             adjacentValues = element[1]
 
-            possibleValues = state.getPossibleValues(position, adjacentValues)
-
-            """ DEBUG """
-            """ print(f"> {possibleValues}") """
+            possibleValues = state.get_possible_values(position, adjacentValues)
 
             for possibleValue in possibleValues:
 
                 action = self.createAction(position, possibleValue)
                 actionsResult.append(action)
-
-        """ DEBUG """
-        """ print(">>> ACTIONS:")
-        for action in actionsResult:
-            print(action) """
 
         return actionsResult
 
@@ -441,35 +335,24 @@ class Numbrix(Problem):
         das presentes na lista obtida pela execução de 
         self.actions(state). """
 
-        # TO~DO
-
         row = action[0]
         col = action[1]
         value = action[2]
 
-        """ return state.setBoardValue(row, col, value) """
-        """ ??? criar um novo estado ou alterar o passado como argumento ??? """
+        """ return state.set_board_value(row, col, value) """
         newState = copy.deepcopy(state)
-        newState.setBoardValue(row, col, value)
+        newState.set_board_value(row, col, value)
         return newState
 
     def goal_test(self, state: NumbrixState):
         """ Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro 
         estão preenchidas com uma sequência de números adjacentes. """
-        # TO~DO
-
-        """ DEBUG """
-        """ print(state.to_string()) """
 
         return state.board.goal_test()
 
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
-        # TODO
-
-        # heuristica 1 (ERRADA): numero de posicoes vazias
-        """ return node.state.board.get_number_of_blank_positions() """
 
         # heuristica 2: numero total de posicoes adjacentes vazias
         #return node.state.board.get_total_number_of_blank_adjacent_positions()
@@ -485,12 +368,9 @@ class Numbrix(Problem):
         number_of_actions = len(actions)
 
         return number_of_blank_adjacent_positions + number_of_actions
-    
-    # TODO: outros metodos da classe
 
 
 if __name__ == "__main__":
-    # TODO:
     # Ler o ficheiro de input de sys.argv[1],
     # Usar uma técnica de procura para resolver a instância,
     # Retirar a solução a partir do nó resultante,
@@ -512,11 +392,6 @@ if __name__ == "__main__":
     print(board.adjacent_horizontal_numbers(2, 2))
     print(board.adjacent_vertical_numbers(1, 1))
     print(board.adjacent_horizontal_numbers(1, 1)) """
-
-    """ DEBUG """
-    """ blankPositionsAdjacentToValues = board.getBlankPositionsAdjacentToValues()
-    for element in blankPositionsAdjacentToValues:
-        print(element) """
 
 
     # Exemplo 2
@@ -599,14 +474,3 @@ if __name__ == "__main__":
     print("Solution:\n", goal_node.state.board.to_string(), sep="") """
     print(goal_node.state.board.to_string())
 
-    # DEBUG
-    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    board = Board.parse_instance("i1.txt") 
-
-    # Criar uma instância de Numbrix:
-    problem = Numbrix(board)
-
-    actions = problem.actions(problem.state)
-
-    for action in actions:
-        print(action) """
