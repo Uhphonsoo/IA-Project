@@ -21,10 +21,7 @@ class NumbrixState:
     def __lt__(self, other):
         return self.id < other.id
 
-    """ def get_blank_positions_adjacent_to_values(self):
-        return self.board.get_blank_positions_adjacent_to_values() """
-
-    # O(1)
+    # < O(N)
     def get_sequential_values(self, adjacent_values):
 
         max = self.board.N ** 2
@@ -36,23 +33,26 @@ class NumbrixState:
                 result.append(value - 1)
         return result
 
-    # O(N^2)
+    # O(1)
     def get_possible_values(self, position, adjacentValues):
 
         possibleValues = []
 
-        # O(N^2)
-        filledValues = self.board.get_filled_values()
+        # O(1)
+        filledValues = self.board.filled_values
 
         max = self.board.N ** 2
 
-        # O(N^2)
+        # < O(N)
         sequential_values = self.get_sequential_values(adjacentValues)
-        for i in range(1, max+1):
+
+        # O(N)
+        for i in sequential_values:
 
             """ if i in sequential_values and i not in filledValues: """
-            if i in sequential_values and i not in filledValues:
-
+            if i not in filledValues:
+                
+                # O(1)
                 number_of_blank_positions_adjacent_to_position = self.board.get_number_of_blank_positions_adjacent_to_position(position)
                 if i == 1 or i == max:
                     possibleValues.append(i)
@@ -63,13 +63,14 @@ class NumbrixState:
 
         return possibleValues
 
+    # O(1)
     def at_least_two_adjacent_numbers_are_sequential(self, number, position):
         horizontal_adjacent_numbers = self.board.adjacent_horizontal_numbers(position[0], position[1])
         vertical_adjacent_numbers = self.board.adjacent_vertical_numbers(position[0], position[1])
 
         return self.board.at_least_two_adjacent_numbers_are_sequential(number, horizontal_adjacent_numbers, vertical_adjacent_numbers)
 
-    # O(1)
+    # O(1) - WWW
     def set_board_value(self, row, col, value):
         """ return NumbrixState(self.board.set_value(row, col, value))  """
         self.board.set_value(row, col, value)
@@ -94,6 +95,9 @@ class Board:
 
         self.N = N
         self.lines = lines[1:]
+
+        self.filled_values = self.get_filled_values()
+        self.blank_positions_adjacent_to_values = self.get_blank_positions_adjacent_to_values()
     
     # O(1)
     def get_number(self, row: int, col: int) -> int:
@@ -108,9 +112,6 @@ class Board:
     def adjacent_vertical_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente abaixo e acima, 
         respectivamente. """
-
-        # Testar input
-        """ self.validate_row_and_col(row, col) """
 
         # Caso N == 1
         if self.N == 1:
@@ -133,9 +134,6 @@ class Board:
     def adjacent_horizontal_numbers(self, row: int, col: int) -> (int, int):
         """ Devolve os valores imediatamente à esquerda e à direita, 
         respectivamente. """
-
-        # Testar input
-        """ self.validate_row_and_col(row, col) """
 
         # Caso N == 1
         if self.N == 1:
@@ -209,6 +207,7 @@ class Board:
                         
         return blankPositionsAdjacentToValues
 
+    # O(1)
     def get_number_of_blank_positions_adjacent_to_position(self, position):
 
         row = position[0]
@@ -240,9 +239,10 @@ class Board:
 
         return filledValues
 
-    # O(1)
+    # O(1) - WWW
     def set_value(self, row, col, value):
         self.lines[row][col] = value
+        self.filled_values.append(value)
         return self
 
     # O(1)
@@ -327,6 +327,7 @@ class Board:
 
         return at_least_one_adjacent_is_sequential
 
+    # O(1)
     def at_least_two_adjacent_numbers_are_sequential(self, current_number, horizontal_adjacent_numbers, vertical_adjacent_numbers):
 
         sequential_numbers = 0
@@ -391,12 +392,12 @@ class Numbrix(Problem):
         # O(N^2)
         positionsAdjacentToValues = state.board.get_blank_positions_adjacent_to_values()
 
-        # O(N^3)
+        # < O(N)
         for element in positionsAdjacentToValues:
             position = element[0]
             adjacentValues = element[1]
 
-            # O(N^2)
+            # O(1)
             possibleValues = state.get_possible_values(position, adjacentValues)
 
             for possibleValue in possibleValues:
@@ -547,9 +548,9 @@ if __name__ == "__main__":
     print("Solution:\n", goal_node.state.board.to_string(), sep="") """
 
     # Moosh
-    input_file = sys.argv[1]
+    #input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
-    #input_file = "i1.txt"
+    input_file = "i1.txt"
     
     # Ler tabuleiro do ficheiro input_file:
     board = Board.parse_instance(input_file) 
