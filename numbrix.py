@@ -391,7 +391,7 @@ class Numbrix(Problem):
         # O(N^2)
         positionsAdjacentToValues = state.board.get_blank_positions_adjacent_to_values()
 
-        # O(N^2)
+        # O(N^3)
         for element in positionsAdjacentToValues:
             position = element[0]
             adjacentValues = element[1]
