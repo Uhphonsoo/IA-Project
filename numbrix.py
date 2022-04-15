@@ -6,6 +6,7 @@
 
 import sys
 import copy
+from turtle import position
 from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, depth_first_tree_search, greedy_search, recursive_best_first_search
 
 
@@ -46,13 +47,27 @@ class NumbrixState:
         max = self.board.N ** 2
 
         # O(N^2)
+        sequential_values = self.get_sequential_values(adjacentValues)
         for i in range(1, max+1):
-            sequential_values = self.get_sequential_values(adjacentValues)
 
+            """ if i in sequential_values and i not in filledValues: """
             if i in sequential_values and i not in filledValues:
-                possibleValues.append(i)
+
+                number_of_blank_positions_adjacent_to_position = self.board.get_number_of_blank_positions_adjacent_to_position(position)
+                if i == 1 or i == max:
+                    possibleValues.append(i)
+                elif number_of_blank_positions_adjacent_to_position != 0:
+                    possibleValues.append(i)
+                elif self.at_least_two_adjacent_numbers_are_sequential(i, position):
+                    possibleValues.append(i)
 
         return possibleValues
+
+    def at_least_two_adjacent_numbers_are_sequential(self, number, position):
+        horizontal_adjacent_numbers = self.board.adjacent_horizontal_numbers(position[0], position[1])
+        vertical_adjacent_numbers = self.board.adjacent_vertical_numbers(position[0], position[1])
+
+        return self.board.at_least_two_adjacent_numbers_are_sequential(number, horizontal_adjacent_numbers, vertical_adjacent_numbers)
 
     # O(1)
     def set_board_value(self, row, col, value):
@@ -194,6 +209,25 @@ class Board:
                         
         return blankPositionsAdjacentToValues
 
+    def get_number_of_blank_positions_adjacent_to_position(self, position):
+
+        row = position[0]
+        col = position[1]
+
+        number_of_blank_positions = 0
+
+        horizontal_values = self.adjacent_horizontal_numbers(row, col)
+        vertical_values = self.adjacent_vertical_numbers(row, col)
+
+        for value in horizontal_values:
+            if value != None and value == 0:
+                number_of_blank_positions += 1
+        for value in vertical_values:
+            if value != None and value == 0:
+                number_of_blank_positions += 1
+
+        return number_of_blank_positions
+
     # O(n^2)
     def get_filled_values(self):
 
@@ -245,7 +279,7 @@ class Board:
             for col in range(self.N):
                 horizontal_adjacent_numbers = self.adjacent_horizontal_numbers(row, col)
                 vertical_adjacent_numbers = self.adjacent_vertical_numbers(row, col)
-                sequential_numbers = 0
+                """ sequential_numbers = 0 """
 
                 # if a single position is empty then this is not a goal state
                 if self.lines[row][col] == 0:
@@ -256,7 +290,10 @@ class Board:
                     return False
 
                 # if for a number != 1 and != N**2 no two sequential numbers are adjacent then this is not a goal state 
-                if self.lines[row][col] > 1 and self.lines[row][col] < self.N ** 2:
+                if not self.at_least_two_adjacent_numbers_are_sequential(self.lines[row][col], horizontal_adjacent_numbers, vertical_adjacent_numbers):
+                    return False
+
+                """ if self.lines[row][col] > 1 and self.lines[row][col] < self.N ** 2:
                     for number in horizontal_adjacent_numbers:
                         if number != None:
                             if number == self.lines[row][col] + 1 or number == self.lines[row][col] - 1:
@@ -266,7 +303,7 @@ class Board:
                             if number == self.lines[row][col] + 1 or number == self.lines[row][col] - 1:
                                 sequential_numbers += 1
                     if sequential_numbers != 2:
-                        return False
+                        return False """
 
         return goal
 
@@ -289,6 +326,23 @@ class Board:
                     at_least_one_adjacent_is_sequential = True
 
         return at_least_one_adjacent_is_sequential
+
+    def at_least_two_adjacent_numbers_are_sequential(self, current_number, horizontal_adjacent_numbers, vertical_adjacent_numbers):
+
+        sequential_numbers = 0
+        if current_number > 1 and current_number < self.N ** 2:
+            for number in horizontal_adjacent_numbers:
+                if number != None:
+                    if number == current_number + 1 or number == current_number - 1:
+                        sequential_numbers += 1
+            for number in vertical_adjacent_numbers:
+                if number != None:
+                    if number == current_number + 1 or number == current_number - 1:
+                        sequential_numbers += 1
+            if sequential_numbers != 2:
+                return False
+        return True
+
 
     """ def get_number_of_blank_positions(self):
 
@@ -493,8 +547,9 @@ if __name__ == "__main__":
     print("Solution:\n", goal_node.state.board.to_string(), sep="") """
 
     # Moosh
-    input_file = sys.argv[1]
+    #input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
+    input_file = "i1.txt"
     
     # Ler tabuleiro do ficheiro input_file:
     board = Board.parse_instance(input_file) 
