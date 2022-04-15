@@ -6,7 +6,7 @@
 
 import sys
 import copy
-from search import Problem, Node, astar_search, breadth_first_tree_search, depth_first_tree_search, greedy_search, recursive_best_first_search
+from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, depth_first_tree_search, greedy_search, recursive_best_first_search
 
 
 class NumbrixState:
@@ -341,6 +341,7 @@ class Numbrix(Problem):
 
         """ return state.set_board_value(row, col, value) """
         newState = copy.deepcopy(state)
+        """ newState = NumbrixState(copy.deepcopy(state.board)) """
         newState.set_board_value(row, col, value)
         return newState
 
@@ -474,3 +475,4 @@ if __name__ == "__main__":
     print("Solution:\n", goal_node.state.board.to_string(), sep="") """
     print(goal_node.state.board.to_string())
 
+    stats = InstrumentedProblem(problem)
