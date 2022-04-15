@@ -379,7 +379,7 @@ class Board:
 class Numbrix(Problem):
     def __init__(self, board: Board):
         """ O construtor especifica o estado inicial. """
-        self.initial = copy.deepcopy(NumbrixState(board))
+        self.initial = NumbrixState(copy.deepcopy(board))
 
     # O(N^2)
     def actions(self, state: NumbrixState):
@@ -547,9 +547,9 @@ if __name__ == "__main__":
     print("Solution:\n", goal_node.state.board.to_string(), sep="") """
 
     # Moosh
-    #input_file = sys.argv[1]
+    input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
-    input_file = "i1.txt"
+    #input_file = "i1.txt"
     
     # Ler tabuleiro do ficheiro input_file:
     board = Board.parse_instance(input_file) 
