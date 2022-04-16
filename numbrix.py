@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v8
+#v9
 
 import sys
 import copy
@@ -766,11 +766,14 @@ class Numbrix(Problem):
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
 
-        # heuristica 2: numero total de posicoes adjacentes vazias
-        #return node.state.board.get_total_number_of_blank_adjacent_positions()
+        # heuristica 1: numero total de posicoes adjacentes vazias + acoes possiveis
+        return self.get_total_number_of_blank_adjacent_positions_and_actions(node)
+
+        # heuristica 2: numero total de acoes possiveis
+        #return self.get_total_number_of_actions(node)
 
         # heuristica 3: numero total de posicoes adjacentes vazias
-        return self.get_total_number_of_blank_adjacent_positions_and_actions(node)
+        #return node.state.board.get_total_number_of_blank_adjacent_positions()
 
     # < O(N)
     def get_total_number_of_blank_adjacent_positions_and_actions(self, node):
@@ -784,6 +787,15 @@ class Numbrix(Problem):
 
         return number_of_blank_adjacent_positions + number_of_actions
 
+    # < O(N)
+    def get_total_number_of_actions(self, node):
+
+        # < O(N)
+        actions = self.actions(node.state)
+        number_of_actions = len(actions)
+
+        return number_of_actions
+
 
 if __name__ == "__main__":
     # Ler o ficheiro de input de sys.argv[1],
@@ -791,89 +803,12 @@ if __name__ == "__main__":
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
 
-    """ # Obter o nome do ficheiro do command line
-    file_name = sys.argv[1]
-
-    # Criar board
-    board = Board.parse_instance(file_name) """
-
-    # Exemplo 1
-    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    board = Board.parse_instance("i1.txt")
-    print("Initial:\n", board.to_string(), sep="")
-
-    # Imprimir valores adjacentes
-    print(board.adjacent_vertical_numbers(2, 2))
-    print(board.adjacent_horizontal_numbers(2, 2))
-    print(board.adjacent_vertical_numbers(1, 1))
-    print(board.adjacent_horizontal_numbers(1, 1)) """
-
-
-    # Exemplo 2
-    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    board = Board.parse_instance("i1.txt") 
-
-    # Criar uma instância de Numbrix:
-    problem = Numbrix(board)
-
-    # Criar um estado com a configuração inicial:
-    initial_state = NumbrixState(board) 
-
-    # Mostrar valor na posição (2, 2):
-    print(initial_state.board.get_number(2, 2))
-
-    # Realizar acção de inserir o número 1 na posição (2, 2)
-    result_state = problem.result(initial_state, (2, 2, 1)) 
-
-    # Mostrar valor na posição (2, 2):
-    print(result_state.board.get_number(2, 2)) """
-
-
-    # Exemplo 3
-    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    board = Board.parse_instance("i1.txt") 
-    
-    # Criar uma instância de Numbrix:
-    problem = Numbrix(board)
-
-    # Criar um estado com a configuração inicial:
-    s0 = NumbrixState(board)
-    print("Initial:\n", s0.board.to_string(), sep="")
-
-    # Aplicar as ações que resolvem a instância
-    s1 = problem.result(s0, (2, 2, 1))
-    s2 = problem.result(s1, (0, 2, 3))
-    s3 = problem.result(s2, (0, 1, 4))
-    s4 = problem.result(s3, (1, 1, 5))
-    s5 = problem.result(s4, (2, 0, 7))
-    s6 = problem.result(s5, (1, 0, 8))
-    s7 = problem.result(s6, (0, 0, 9))
-
-    # Verificar se foi atingida a solução
-    print("Is goal?", problem.goal_test(s7))
-    print("Solution:\n", s7.board.to_string(), sep="") """
-
-
-    # Exemplo 4
-    """ # Ler tabuleiro do ficheiro 'i1.txt' (Figura 1):
-    board = Board.parse_instance("i1.txt") 
-
-    # Criar uma instância de Numbrix:
-    problem = Numbrix(board)
-
-    # Obter o nó solução usando a procura A*:
-    goal_node = astar_search(problem) #TODO isto esta' a retornar None
-
-    # Verificar se foi atingida a solução
-    print("Is goal?", problem.goal_test(goal_node.state))
-    print("Solution:\n", goal_node.state.board.to_string(), sep="") """
-
-    # Moosh
+    # Obter o nome do ficheiro do command line
     input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
     #input_file = "i1.txt"
     
-    # Ler tabuleiro do ficheiro input_file:
+    # Criar board
     board = Board.parse_instance(input_file) 
 
     # Criar uma instância de Numbrix:
