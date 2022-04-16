@@ -698,6 +698,7 @@ class Numbrix(Problem):
     def __init__(self, board: Board):
         """ O construtor especifica o estado inicial. """
         self.initial = NumbrixState(copy.deepcopy(board))
+        self.number_of_actions = 0
 
     # < O(N)
     def actions(self, state: NumbrixState):
@@ -721,8 +722,11 @@ class Numbrix(Problem):
             for possibleValue in possibleValues:
 
                 action = self.createAction(position, possibleValue)
+
+                """ if action not in actionsResult: """
                 actionsResult.append(action)
 
+        self.number_of_actions = len(actionsResult)
         return actionsResult
 
     # O(1)
@@ -775,6 +779,9 @@ class Numbrix(Problem):
         # heuristica 3: numero total de posicoes adjacentes vazias
         #return node.state.board.get_total_number_of_blank_adjacent_positions()
 
+        # heuristica 4: numero total de posicoes adjacentes vazias + acoes possiveis + posicoes vazias adjacentes 'a jogada
+        return self.heuristic_4(node)
+
     # < O(N)
     def get_total_number_of_blank_adjacent_positions_and_actions(self, node):
 
@@ -785,6 +792,9 @@ class Numbrix(Problem):
         actions = self.actions(node.state)
         number_of_actions = len(actions)
 
+        """ # O(1)
+        number_of_actions = self.number_of_actions """
+
         return number_of_blank_adjacent_positions + number_of_actions
 
     # < O(N)
@@ -793,6 +803,9 @@ class Numbrix(Problem):
         # < O(N)
         actions = self.actions(node.state)
         number_of_actions = len(actions)
+
+        """ # O(1)
+        number_of_actions = self.number_of_actions """
 
         return number_of_actions
 
@@ -804,9 +817,11 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
 
     # Obter o nome do ficheiro do command line
-    input_file = sys.argv[1]
+    #input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
-    #input_file = "i1.txt"
+    input_file = "i1.txt"
+    #input_file = "i4.txt"
+    #input_file = "i5.txt"
     
     # Criar board
     board = Board.parse_instance(input_file) 
