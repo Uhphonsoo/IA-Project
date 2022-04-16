@@ -2,11 +2,11 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v6
+#v8
 
 import sys
 import copy
-from turtle import position
+""" from turtle import position """
 from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, depth_first_tree_search, greedy_search, recursive_best_first_search
 
 
@@ -21,11 +21,13 @@ class NumbrixState:
     def __lt__(self, other):
         return self.id < other.id
 
-    # < O(N)
+    # O(1)
     def get_sequential_values(self, adjacent_values):
 
         max = self.board.N ** 2
         result = []
+
+        # O(1)
         for value in adjacent_values:
             if value + 1 < max + 1:
                 result.append(value + 1)
@@ -43,10 +45,10 @@ class NumbrixState:
 
         max = self.board.N ** 2
 
-        # < O(N)
+        # O(1)
         sequential_values = self.get_sequential_values(adjacentValues)
 
-        # O(N)
+        # O(1)
         for i in sequential_values:
 
             """ if i in sequential_values and i not in filledValues: """
@@ -65,14 +67,18 @@ class NumbrixState:
 
     # O(1)
     def at_least_two_adjacent_numbers_are_sequential(self, number, position):
+
+        # O(1)
         horizontal_adjacent_numbers = self.board.adjacent_horizontal_numbers(position[0], position[1])
         vertical_adjacent_numbers = self.board.adjacent_vertical_numbers(position[0], position[1])
 
+        # O(1)
         return self.board.at_least_two_adjacent_numbers_are_sequential(number, horizontal_adjacent_numbers, vertical_adjacent_numbers)
 
-    # O(1) - WWW
+    # < O(N) - WWW
     def set_board_value(self, row, col, value):
         """ return NumbrixState(self.board.set_value(row, col, value))  """
+        # < O(N)
         self.board.set_value(row, col, value)
 
     def to_string(self):
@@ -104,9 +110,7 @@ class Board:
     def get_number(self, row: int, col: int) -> int:
         """ Devolve o valor na respetiva posição do tabuleiro. """
 
-        # Validar input
-        """ self.validate_row_and_col(row, col) """
-
+        # O(1)
         return self.lines[row][col]
     
     # O(1)
@@ -170,7 +174,6 @@ class Board:
 
         # Criar e retornar board
         board = Board(lines_ints)
-        file.close()
         return board
         
     # O(N^2)
@@ -194,11 +197,13 @@ class Board:
                     verticalAdjacentValues = self.adjacent_vertical_numbers(line, col)
                     horizontalAdjacentValues = self.adjacent_horizontal_numbers(line, col)
 
+                    # O(1)
                     for verticalValue in verticalAdjacentValues:
                         if verticalValue != 0 and verticalValue != None:
                             adjacentToNonBlankPosition = True
                             adjacentValuesOfThisPosition.add(verticalValue)
 
+                    # O(1)
                     for horizontalValue in horizontalAdjacentValues:
                         if horizontalValue != 0 and horizontalValue != None:
                             adjacentToNonBlankPosition = True
@@ -217,9 +222,11 @@ class Board:
 
         number_of_blank_positions = 0
 
+        # O(1)
         horizontal_values = self.adjacent_horizontal_numbers(row, col)
         vertical_values = self.adjacent_vertical_numbers(row, col)
 
+        # O(1)
         for value in horizontal_values:
             if value != None and value == 0:
                 number_of_blank_positions += 1
@@ -229,7 +236,7 @@ class Board:
 
         return number_of_blank_positions
 
-    # O(n^2)
+    # O(N^2)
     def get_filled_values(self):
 
         filledValues = []
@@ -241,13 +248,14 @@ class Board:
 
         return filledValues
 
-    # O(1) - WWW
+    # < O(N) - WWW
     def set_value(self, row, col, value):
         self.lines[row][col] = value
         self.filled_values.append(value)
 
         # Update self.blank_positions_adjacent_to_values
         # Remove old
+        # < O(N) ??? DA PARA MELHORAR ???
         for element in self.blank_positions_adjacent_to_values:
             position = element[0]
             if position == (row, col):
@@ -263,19 +271,17 @@ class Board:
                 blank_positions_adjacent_to_values.append() """
         if row == 0:
             if col == 0:
+                # O(1)
                 if self.get_number(row, col+1) == 0:
                     new_blank_position = [(row, col+1)]
                     adjacent_values = set()
 
+                    # O(1)
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    # O(1)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -287,12 +293,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -305,12 +306,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -322,12 +318,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -339,12 +330,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -357,12 +343,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -374,12 +355,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -393,12 +369,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -410,12 +381,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -427,12 +393,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -445,12 +406,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -462,12 +418,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -479,12 +430,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -496,12 +442,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -514,12 +455,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -531,12 +467,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -548,12 +479,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -567,12 +493,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -584,12 +505,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -602,12 +518,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -619,12 +530,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -636,12 +542,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -654,12 +555,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -671,12 +567,7 @@ class Board:
                     horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
                     vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
 
-                    for value in horizontal_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
-                    for value in vertical_adjacent_aux:
-                        if value != None and value != 0:
-                            adjacent_values.add(value)
+                    self.add_to_adjacent_values(adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux)
 
                     new_blank_position.append(adjacent_values)
                     self.blank_positions_adjacent_to_values.append(new_blank_position)
@@ -685,10 +576,15 @@ class Board:
         return self
 
     # O(1)
-    def validate_row_and_col(self, row, col):
-    
-        if (row < 0 or row >= self.N or col < 0 or col >= self.N):
-            raise Exception("validate_row_and_col: Input incorreto.")
+    def add_to_adjacent_values(self, adjacent_values, value, horizontal_adjacent_aux, vertical_adjacent_aux):
+        # O(1)
+        for value in horizontal_adjacent_aux:
+            if value != None and value != 0:
+                adjacent_values.add(value)
+        # O(1)
+        for value in vertical_adjacent_aux:
+            if value != None and value != 0:
+                adjacent_values.add(value)
 
     """ def goal_test(self):
 
@@ -716,33 +612,24 @@ class Board:
         # O(N^2)
         for row in range(self.N):
             for col in range(self.N):
+
+                # O(1)
                 horizontal_adjacent_numbers = self.adjacent_horizontal_numbers(row, col)
                 vertical_adjacent_numbers = self.adjacent_vertical_numbers(row, col)
-                """ sequential_numbers = 0 """
 
                 # if a single position is empty then this is not a goal state
                 if self.lines[row][col] == 0:
                     return False
 
                 # if not a single adjacent number is sequential then this is not a goal state
+                # O(1)
                 if not self.at_least_one_adjacent_number_is_sequential(self.lines[row][col], horizontal_adjacent_numbers, vertical_adjacent_numbers):
                     return False
 
                 # if for a number != 1 and != N**2 no two sequential numbers are adjacent then this is not a goal state 
+                # O(1)
                 if not self.at_least_two_adjacent_numbers_are_sequential(self.lines[row][col], horizontal_adjacent_numbers, vertical_adjacent_numbers):
                     return False
-
-                """ if self.lines[row][col] > 1 and self.lines[row][col] < self.N ** 2:
-                    for number in horizontal_adjacent_numbers:
-                        if number != None:
-                            if number == self.lines[row][col] + 1 or number == self.lines[row][col] - 1:
-                                sequential_numbers += 1
-                    for number in vertical_adjacent_numbers:
-                        if number != None:
-                            if number == self.lines[row][col] + 1 or number == self.lines[row][col] - 1:
-                                sequential_numbers += 1
-                    if sequential_numbers != 2:
-                        return False """
 
         return goal
 
@@ -754,11 +641,13 @@ class Board:
         if current_number < 1 or current_number > self.N ** 2:
             raise Exception("at_least_one_adjacent_number_is_sequential: Input incorreto.")
 
+        # O(1)
         for number in horizontal_adjacent_numbers:
             if number != None:
                 if number == current_number + 1 or number == current_number - 1:
                     at_least_one_adjacent_is_sequential = True
 
+        # O(1)
         for number in vertical_adjacent_numbers:
             if number != None:
                 if number == current_number + 1 or number == current_number - 1:
@@ -771,10 +660,12 @@ class Board:
 
         sequential_numbers = 0
         if current_number > 1 and current_number < self.N ** 2:
+            # O(1)
             for number in horizontal_adjacent_numbers:
                 if number != None:
                     if number == current_number + 1 or number == current_number - 1:
                         sequential_numbers += 1
+            # O(1)
             for number in vertical_adjacent_numbers:
                 if number != None:
                     if number == current_number + 1 or number == current_number - 1:
@@ -782,18 +673,6 @@ class Board:
             if sequential_numbers != 2:
                 return False
         return True
-
-
-    """ def get_number_of_blank_positions(self):
-
-        number_of_blank_positions = 0
-
-        for line in self.lines:
-            for number in line:
-                if number == 0:
-                    number_of_blank_positions += 1
-
-        return number_of_blank_positions """
 
     def to_string(self):
         board_string = ""
@@ -808,12 +687,9 @@ class Board:
         
         return board_string
 
-    """ # O(N^2) """
     # O(1)
     def get_total_number_of_blank_adjacent_positions(self):
 
-        """ # O(N^2) """
-        """ blank_positions = self.get_blank_positions_adjacent_to_values() """
         # O(1)
         return len(self.blank_positions_adjacent_to_values)
 
@@ -823,14 +699,14 @@ class Numbrix(Problem):
         """ O construtor especifica o estado inicial. """
         self.initial = NumbrixState(copy.deepcopy(board))
 
-    # O(N^2)
+    # < O(N)
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento. """
 
         actionsResult = []
 
-        # O(N^2)
+        # O(1)
         positionsAdjacentToValues = state.board.blank_positions_adjacent_to_values
 
         # < O(N)
@@ -841,6 +717,7 @@ class Numbrix(Problem):
             # O(1)
             possibleValues = state.get_possible_values(position, adjacentValues)
 
+            # O(1)
             for possibleValue in possibleValues:
 
                 action = self.createAction(position, possibleValue)
@@ -863,7 +740,10 @@ class Numbrix(Problem):
         col = action[1]
         value = action[2]
 
+        # O(N^2) ???
         new_state = copy.deepcopy(state)
+
+        # < O(N)
         new_state.set_board_value(row, col, value)
 
         """ new_lines = list(state.board.lines[:])
@@ -882,7 +762,7 @@ class Numbrix(Problem):
 
         return state.board.goal_test()
 
-    # O(N^2)
+    # < O(N)
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
 
@@ -892,14 +772,13 @@ class Numbrix(Problem):
         # heuristica 3: numero total de posicoes adjacentes vazias
         return self.get_total_number_of_blank_adjacent_positions_and_actions(node)
 
-    # O(N^2)
+    # < O(N)
     def get_total_number_of_blank_adjacent_positions_and_actions(self, node):
 
-        """ # O(N^2) """
         # O(1)
         number_of_blank_adjacent_positions = node.state.board.get_total_number_of_blank_adjacent_positions()
 
-        # O(N^2)
+        # < O(N)
         actions = self.actions(node.state)
         number_of_actions = len(actions)
 
