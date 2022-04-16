@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v4
+#v6
 
 import sys
 import copy
@@ -98,6 +98,7 @@ class Board:
 
         self.filled_values = self.get_filled_values()
         self.blank_positions_adjacent_to_values = self.get_blank_positions_adjacent_to_values()
+        self.max = N**2
     
     # O(1)
     def get_number(self, row: int, col: int) -> int:
@@ -169,6 +170,7 @@ class Board:
 
         # Criar e retornar board
         board = Board(lines_ints)
+        file.close()
         return board
         
     # O(N^2)
@@ -243,6 +245,443 @@ class Board:
     def set_value(self, row, col, value):
         self.lines[row][col] = value
         self.filled_values.append(value)
+
+        # Update self.blank_positions_adjacent_to_values
+        # Remove old
+        for element in self.blank_positions_adjacent_to_values:
+            position = element[0]
+            if position == (row, col):
+                self.blank_positions_adjacent_to_values.remove(element)
+
+        # Add new
+        horizontal_adjacent = self.adjacent_horizontal_numbers(row, col)
+        vertical_adjacent = self.adjacent_vertical_numbers(row, col)
+
+        """ for value in horizontal_adjacent:
+            if value != 0:
+                horizontal_adjacent_aux = 
+                blank_positions_adjacent_to_values.append() """
+        if row == 0:
+            if col == 0:
+                if self.get_number(row, col+1) == 0:
+                    new_blank_position = [(row, col+1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row+1, col) == 0:
+                    new_blank_position = [(row+1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+            elif col > 0 and col < self.N - 1:
+                if self.get_number(row, col-1) == 0:
+                    new_blank_position = [(row, col-1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row+1, col) == 0:
+                    new_blank_position = [(row+1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row, col+1) == 0:
+                    new_blank_position = [(row, col+1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+            elif col == self.N - 1:
+                if self.get_number(row, col-1) == 0:
+                    new_blank_position = [(row, col-1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row+1, col) == 0:
+                    new_blank_position = [(row+1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+        elif row > 0 and row < self.N - 1:      
+            if col == 0:
+                if self.get_number(row-1, col) == 0:
+                    new_blank_position = [(row-1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row, col+1) == 0:
+                    new_blank_position = [(row, col+1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row+1, col) == 0:
+                    new_blank_position = [(row+1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+            elif col > 0 and col < self.N - 1:
+                if self.get_number(row-1, col) == 0:
+                    new_blank_position = [(row-1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row, col-1) == 0:
+                    new_blank_position = [(row, col-1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row, col+1) == 0:
+                    new_blank_position = [(row, col+1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row+1, col) == 0:
+                    new_blank_position = [(row+1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+            elif col == self.N - 1:
+                if self.get_number(row-1, col) == 0:
+                    new_blank_position = [(row-1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row, col-1) == 0:
+                    new_blank_position = [(row, col-1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row+1, col) == 0:
+                    new_blank_position = [(row+1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row+1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row+1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+        elif row == self.N-1:
+            if col == 0:
+                if self.get_number(row-1, col) == 0:
+                    new_blank_position = [(row-1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row, col+1) == 0:
+                    new_blank_position = [(row, col+1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+            elif col > 0 and col < self.N - 1:
+                if self.get_number(row, col-1) == 0:
+                    new_blank_position = [(row, col-1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row-1, col) == 0:
+                    new_blank_position = [(row-1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row, col+1) == 0:
+                    new_blank_position = [(row, col+1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col+1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col+1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+            elif col == self.N - 1:
+                if self.get_number(row, col-1) == 0:
+                    new_blank_position = [(row, col-1)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row, col-1)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row, col-1)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+
+                if self.get_number(row-1, col) == 0:
+                    new_blank_position = [(row-1, col)]
+                    adjacent_values = set()
+
+                    horizontal_adjacent_aux = self.adjacent_horizontal_numbers(row-1, col)
+                    vertical_adjacent_aux = self.adjacent_vertical_numbers(row-1, col)
+
+                    for value in horizontal_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+                    for value in vertical_adjacent_aux:
+                        if value != None and value != 0:
+                            adjacent_values.add(value)
+
+                    new_blank_position.append(adjacent_values)
+                    self.blank_positions_adjacent_to_values.append(new_blank_position)
+                
+
         return self
 
     # O(1)
@@ -369,12 +808,14 @@ class Board:
         
         return board_string
 
-    # O(N^2)
+    """ # O(N^2) """
+    # O(1)
     def get_total_number_of_blank_adjacent_positions(self):
 
-        # O(N^2)
-        blank_positions = self.get_blank_positions_adjacent_to_values()
-        return len(blank_positions)
+        """ # O(N^2) """
+        """ blank_positions = self.get_blank_positions_adjacent_to_values() """
+        # O(1)
+        return len(self.blank_positions_adjacent_to_values)
 
 
 class Numbrix(Problem):
@@ -390,7 +831,7 @@ class Numbrix(Problem):
         actionsResult = []
 
         # O(N^2)
-        positionsAdjacentToValues = state.board.get_blank_positions_adjacent_to_values()
+        positionsAdjacentToValues = state.board.blank_positions_adjacent_to_values
 
         # < O(N)
         for element in positionsAdjacentToValues:
@@ -454,7 +895,8 @@ class Numbrix(Problem):
     # O(N^2)
     def get_total_number_of_blank_adjacent_positions_and_actions(self, node):
 
-        # O(N^2)
+        """ # O(N^2) """
+        # O(1)
         number_of_blank_adjacent_positions = node.state.board.get_total_number_of_blank_adjacent_positions()
 
         # O(N^2)
@@ -548,9 +990,9 @@ if __name__ == "__main__":
     print("Solution:\n", goal_node.state.board.to_string(), sep="") """
 
     # Moosh
-    #input_file = sys.argv[1]
+    input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
-    input_file = "i1.txt"
+    #input_file = "i1.txt"
     
     # Ler tabuleiro do ficheiro input_file:
     board = Board.parse_instance(input_file) 
