@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v11
+#v12
 
 import sys
 import copy
@@ -763,38 +763,52 @@ class Numbrix(Problem):
 
         actions_result_set = set()
         actionsResult = []
+        choice_index = 0
 
         # O(1)
         positionsAdjacentToValues = state.board.blank_positions_adjacent_to_values
 
-        # choose value for which actions will be generated
-        if len(positionsAdjacentToValues) > 0: # < O(N)
-            chosen_element = positionsAdjacentToValues[0]
-            adjacent_value_set = chosen_element[1]
-            adjacent_value_list = list(adjacent_value_set)
-            chosen_value = adjacent_value_list[0]
+        while True:
+            # choose value for which actions will be generated
+            number_of_blank_positions_adjacent_to_values = len(positionsAdjacentToValues)
 
-        # < O(N)
-        """ if len(positionsAdjacentToValues) > 0: """
-        for element in positionsAdjacentToValues:
-            position = element[0]
-            adjacentValues = element[1]
+            if number_of_blank_positions_adjacent_to_values == 0:
+                break
 
-            # if chosen value is not in values adjacent to positions
-            # dont create action for that position
-            if chosen_value not in adjacentValues:
-                continue
+            if number_of_blank_positions_adjacent_to_values > choice_index: # < O(N)
+                chosen_element = positionsAdjacentToValues[choice_index]
+                adjacent_value_set = chosen_element[1]
+                adjacent_value_list = list(adjacent_value_set)
+                chosen_value = adjacent_value_list[0]
 
-            # O(1)
-            possibleValues = state.get_possible_values(position, adjacentValues)
+            # < O(N)
+            """ if len(positionsAdjacentToValues) > 0: """
+            for element in positionsAdjacentToValues:
+                position = element[0]
+                adjacentValues = element[1]
 
-            # O(1)
-            for possibleValue in possibleValues:
+                # if chosen value is not in values adjacent to positions
+                # dont create action for that position
+                if chosen_value not in adjacentValues:
+                    continue
 
-                action = self.createAction(position, possibleValue)
+                # O(1)
+                possibleValues = state.get_possible_values(position, adjacentValues)
 
-                """ actionsResult.append(action) """
-                actions_result_set.add(action)
+                # O(1)
+                for possibleValue in possibleValues:
+
+                    action = self.createAction(position, possibleValue)
+
+                    """ actionsResult.append(action) """
+                    actions_result_set.add(action)
+
+            if len(actions_result_set) != 0:
+                break
+            if len(actions_result_set) == 0 and choice_index == number_of_blank_positions_adjacent_to_values - 1:
+                break
+
+            choice_index += 1
 
         actionsResult = list(actions_result_set)
         self.number_of_actions = len(actionsResult)
@@ -929,11 +943,11 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
 
     # Obter o nome do ficheiro do command line
-    #input_file = sys.argv[1]
+    input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
     #input_file = "i1.txt"
     #input_file = "i4.txt"
-    input_file = "i3.txt"
+    #input_file = "i3.txt"
     #input_file = "i5.txt"
     
     # Criar board
