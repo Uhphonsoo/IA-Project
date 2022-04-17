@@ -767,10 +767,23 @@ class Numbrix(Problem):
         # O(1)
         positionsAdjacentToValues = state.board.blank_positions_adjacent_to_values
 
+        # choose value for which actions will be generated
+        if len(positionsAdjacentToValues) > 0: # < O(N)
+            chosen_element = positionsAdjacentToValues[0]
+            adjacent_value_set = chosen_element[1]
+            adjacent_value_list = list(adjacent_value_set)
+            chosen_value = adjacent_value_list[0]
+
         # < O(N)
+        """ if len(positionsAdjacentToValues) > 0: """
         for element in positionsAdjacentToValues:
             position = element[0]
             adjacentValues = element[1]
+
+            # if chosen value is not in values adjacent to positions
+            # dont create action for that position
+            if chosen_value not in adjacentValues:
+                continue
 
             # O(1)
             possibleValues = state.get_possible_values(position, adjacentValues)
@@ -875,7 +888,8 @@ class Numbrix(Problem):
 
         # < O(N)
         """ aux = self.get_total_number_of_blank_adjacent_positions_and_actions(node) """
-        aux = node.state.board.get_total_number_of_blank_adjacent_positions()
+        total_number_of_blank_adjacent = node.state.board.get_total_number_of_blank_adjacent_positions()
+        aux = total_number_of_blank_adjacent
 
         actions = self.actions(node.state)
         number_of_actions = len(actions)
@@ -915,10 +929,11 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
 
     # Obter o nome do ficheiro do command line
-    input_file = sys.argv[1]
+    #input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
     #input_file = "i1.txt"
     #input_file = "i4.txt"
+    input_file = "i3.txt"
     #input_file = "i5.txt"
     
     # Criar board
