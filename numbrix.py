@@ -2,11 +2,10 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v12
+#v14
 
 import sys
 import copy
-""" from turtle import position """
 from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, depth_first_tree_search, greedy_search, recursive_best_first_search
 
 
@@ -35,10 +34,12 @@ class NumbrixState:
                 result.append(value - 1)
         return result
 
-    # O(1)
+    # O(N^2) ???
     def get_possible_values(self, position, adjacentValues):
 
         possibleValues = []
+        row = position[0]
+        col = position[1]
 
         # O(1)
         filledValues = self.board.filled_values
@@ -48,11 +49,30 @@ class NumbrixState:
         # O(1)
         sequential_values = self.get_sequential_values(adjacentValues)
 
-        # O(1)
+        # O(N^2) ???
         for i in sequential_values:
 
             """ if i in sequential_values and i not in filledValues: """
+            # O(N^2) ???
             if i not in filledValues:
+
+                # esquerda - direita
+                if col - 1 >= 0 and col + 1 < self.board.N:
+                    left = self.board.get_number(row, col - 1)
+                    right = self.board.get_number(row, col + 1)
+
+                    if self.are_sequential(i, left, right):
+                        possibleValues.append(i)
+                        return possibleValues
+
+                # cima - baixo
+                if row - 1 >= 0 and row + 1 < self.board.N:
+                    up = self.board.get_number(row - 1, col)
+                    down = self.board.get_number(row + 1, col)
+
+                    if self.are_sequential(i, up, down):
+                        possibleValues.append(i)
+                        return possibleValues
                 
                 # O(1)
                 number_of_blank_positions_adjacent_to_position = self.board.get_number_of_blank_positions_adjacent_to_position(position)
@@ -75,6 +95,10 @@ class NumbrixState:
         # O(1)
         return self.board.at_least_two_adjacent_numbers_are_sequential(number, horizontal_adjacent_numbers, vertical_adjacent_numbers)
 
+    def are_sequential(self, n, n1, n2):
+        sequential = [n-1, n+1]
+        return n1 in sequential and n2 in sequential
+
     # < O(N) - WWW
     def set_board_value(self, row, col, value):
         """ return NumbrixState(self.board.set_value(row, col, value))  """
@@ -87,7 +111,6 @@ class NumbrixState:
 
 class Board:
     """ Representação interna de um tabuleiro de Numbrix. """
-
     def __init__(self, lines):
 
         # a primeira linha de linhas e' da forma [N]
@@ -756,7 +779,7 @@ class Numbrix(Problem):
         self.initial = NumbrixState(copy.deepcopy(board))
         self.number_of_actions = 0
 
-    # < O(N)
+    # < O(N^3) ???
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento. """
@@ -781,7 +804,7 @@ class Numbrix(Problem):
                 adjacent_value_list = list(adjacent_value_set)
                 chosen_value = adjacent_value_list[0]
 
-            # < O(N)
+            # < O(N^3) ???
             """ if len(positionsAdjacentToValues) > 0: """
             for element in positionsAdjacentToValues:
                 position = element[0]
@@ -792,7 +815,7 @@ class Numbrix(Problem):
                 if chosen_value not in adjacentValues:
                     continue
 
-                # O(1)
+                # O(N^2) ???
                 possibleValues = state.get_possible_values(position, adjacentValues)
 
                 # O(1)
@@ -957,9 +980,9 @@ if __name__ == "__main__":
     problem = Numbrix(board)
 
     # Obter o nó solução usando a procura A*:
-    #goal_node = astar_search(problem)
-    goal_node = greedy_search(problem)
-    # goal_node = breadth_first_tree_search(problem)
+    goal_node = astar_search(problem)
+    #goal_node = greedy_search(problem)
+    #goal_node = breadth_first_tree_search(problem)
     # goal_node = depth_first_tree_search(problem)
 
     # Verificar se foi atingida a solução
