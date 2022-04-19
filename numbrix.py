@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v18
+#v22
 
 import sys
 import copy
@@ -438,6 +438,7 @@ class Numbrix(Problem):
         self.number_of_actions = 0
 
     # O(N^2)
+    # actions_vanilla
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento. """
@@ -457,6 +458,11 @@ class Numbrix(Problem):
         for row in range(N):
             for col in range(N):
 
+                if self.test_sequence(chosen_value, row, col, state):
+                    action = self.createAction((row, col), chosen_value)
+                    actions.append(action)
+                    return actions
+
                 if state.board.get_number(row, col) == 0:
                     horizontal_adjacent = state.board.adjacent_horizontal_numbers(row, col)
                     vertical_adjacent = state.board.adjacent_vertical_numbers(row, col)
@@ -466,6 +472,132 @@ class Numbrix(Problem):
                         actions.append(action)
 
         return actions
+
+    # O(N^2)
+    # actions_choice
+    def actions_choice(self, state: NumbrixState):
+        """ Retorna uma lista de ações que podem ser executadas a
+        partir do estado passado como argumento. """
+
+        missing_values = state.board.missing_values
+        number_of_missing_values = len(missing_values)
+        choices = 0
+
+        # se tabuleiro esta completamente preenchido
+        if number_of_missing_values == 0:
+            return []
+
+        actions = []
+        N = state.board.N
+
+        while actions == [] and choices < number_of_missing_values:
+
+            actions = []
+            chosen_value = self.choose_value(missing_values, state)
+            choices += 1
+
+            # O(N^2)
+            for row in range(N):
+                for col in range(N):
+
+                    if state.board.get_number(row, col) == 0:
+                        horizontal_adjacent = state.board.adjacent_horizontal_numbers(row, col)
+                        vertical_adjacent = state.board.adjacent_vertical_numbers(row, col)
+
+                        if state.board.at_least_one_adjacent_number_is_sequential(chosen_value, horizontal_adjacent, vertical_adjacent):
+                            action = self.createAction((row, col), chosen_value)
+                            actions.append(action)
+
+            if actions != []:
+                break
+
+            # no more choices for chosen value
+            if choices == number_of_missing_values:
+                break
+
+        return actions
+
+    # O(N^2)
+    # actions_incremental
+    def actions_incremental(self, state: NumbrixState):
+        """ Retorna uma lista de ações que podem ser executadas a
+        partir do estado passado como argumento. """
+
+        missing_values = state.board.missing_values
+        number_of_missing_values = len(missing_values)
+        choices = 0
+
+        # se tabuleiro esta completamente preenchido
+        if number_of_missing_values == 0:
+            return []
+
+        actions = []
+        N = state.board.N
+
+        for missing_value in missing_values:
+
+            actions = []
+
+            # O(N^2)
+            for row in range(N):
+                for col in range(N):
+
+                    if self.test_sequence(missing_value, row, col, state):
+                        action = self.createAction((row, col), missing_value)
+                        actions.append(action)
+                        return actions
+
+                    if state.board.get_number(row, col) == 0:
+                        horizontal_adjacent = state.board.adjacent_horizontal_numbers(row, col)
+                        vertical_adjacent = state.board.adjacent_vertical_numbers(row, col)
+
+                        if state.board.at_least_one_adjacent_number_is_sequential(missing_value, horizontal_adjacent, vertical_adjacent):
+                            action = self.createAction((row, col), missing_value)
+                            actions.append(action)
+
+            if actions != []:
+                break
+
+        return actions
+
+    # O(1)
+    def test_sequence(self, missing_value, row, col, state):
+
+        N = state.board.N
+        max = state.board.max
+
+        if missing_value == 1 or missing_value == max:
+            return False
+
+        # esquerda - direita
+        if col - 1 >= 0 and col + 1 < N:
+            left = state.board.get_number(row, col - 1)
+            right = state.board.get_number(row, col + 1)
+
+            if state.are_sequential(missing_value, left, right):
+                return True
+
+        # cima - baixo
+        if row - 1 >= 0 and row + 1 < N:
+            up = state.board.get_number(row - 1, col)
+            down = state.board.get_number(row + 1, col)
+
+            if state.are_sequential(missing_value, up, down):
+                return True
+
+        return False
+
+    """ # O(N^2)
+    def choose_value(self, missing_values, state):
+        
+        N = state.board.N
+        for row in range(N):
+            for col in range(N):
+                if state.board.get_number(row, col) == 
+
+        horizontal_adjacent
+        for value in missing_values: """
+
 
     # O(1)
     def createAction(self, position, possibleValue):
