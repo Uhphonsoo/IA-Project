@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v14
+#v15
 
 import sys
 import copy
@@ -779,7 +779,7 @@ class Numbrix(Problem):
         self.initial = NumbrixState(copy.deepcopy(board))
         self.number_of_actions = 0
 
-    # < O(N^3) ???
+    # < O(N^4/4) ???
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento. """
@@ -791,7 +791,8 @@ class Numbrix(Problem):
         # O(1)
         positionsAdjacentToValues = state.board.blank_positions_adjacent_to_values
 
-        while True:
+        # O(N^4/4)
+        while True: # O(N^2/2)
             # choose value for which actions will be generated
             number_of_blank_positions_adjacent_to_values = len(positionsAdjacentToValues)
 
@@ -804,7 +805,7 @@ class Numbrix(Problem):
                 adjacent_value_list = list(adjacent_value_set)
                 chosen_value = adjacent_value_list[0]
 
-            # < O(N^3) ???
+            # < O(N^2/2) ???
             """ if len(positionsAdjacentToValues) > 0: """
             for element in positionsAdjacentToValues:
                 position = element[0]
@@ -888,7 +889,11 @@ class Numbrix(Problem):
         #return node.state.board.get_total_number_of_blank_adjacent_positions()
 
         # heuristica 4: numero total de posicoes adjacentes vazias + acoes possiveis + posicoes vazias adjacentes 'a jogada
-        return self.heuristic_4(node)
+        #return self.heuristic_4(node)
+
+        # heuristica 5: numero total de posicoes adjacentes vazias + acoes possiveis + posicoes vazias adjacentes 'a jogada
+        # + numero de pecas vazias
+        return self.heuristic_5(node)
 
     # < O(N)
     def get_total_number_of_blank_adjacent_positions_and_actions(self, node):
@@ -958,6 +963,47 @@ class Numbrix(Problem):
 
         return aux + number_of_blank_adjacent_positions
         
+    def heuristic_5(self, node):
+        if node.state.board.impossible_board == True:
+            return node.state.board.max * 100
+
+        # < O(N)
+        """ aux = self.get_total_number_of_blank_adjacent_positions_and_actions(node) """
+        total_number_of_blank_adjacent = node.state.board.get_total_number_of_blank_adjacent_positions()
+        aux = total_number_of_blank_adjacent
+
+        actions = self.actions(node.state)
+        number_of_actions = len(actions)
+        aux += number_of_actions
+
+        total_number_of_blank_positions = node.state.board.max - node.state.board.number_of_filled_values
+        aux += total_number_of_blank_positions
+
+        if number_of_actions == 0 and node.state.board.number_of_filled_values != node.state.board.max:
+            return node.state.board.max * 100
+
+        number_of_blank_adjacent_positions = 0
+
+        last_changed_position = node.state.board.last_changed_position
+        row = last_changed_position[0]
+        col = last_changed_position[1]
+
+        # O(1)
+        horizontal_numbers = node.state.board.adjacent_horizontal_numbers(row, col)
+        vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
+
+        # O(1)
+        for number in horizontal_numbers:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+        for number in vertical_numbers:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+
+        if last_changed_position == (-1, -1):
+            number_of_blank_adjacent_positions = 0
+
+        return aux + number_of_blank_adjacent_positions
 
 if __name__ == "__main__":
     # Ler o ficheiro de input de sys.argv[1],
@@ -980,8 +1026,8 @@ if __name__ == "__main__":
     problem = Numbrix(board)
 
     # Obter o nó solução usando a procura A*:
-    goal_node = astar_search(problem)
-    #goal_node = greedy_search(problem)
+    #goal_node = astar_search(problem)
+    goal_node = greedy_search(problem)
     #goal_node = breadth_first_tree_search(problem)
     # goal_node = depth_first_tree_search(problem)
 
