@@ -2,10 +2,11 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v22
+#v24
 
 import sys
 import copy
+import random
 from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, depth_first_tree_search, greedy_search, recursive_best_first_search
 
 
@@ -128,11 +129,21 @@ class Board:
 
         self.impossible_board = False
 
-        # O(N^2)
-        self.number_of_filled_values = len(self.get_filled_values())
+        """ # O(N^2)
+        self.number_of_filled_values = len(self.get_filled_values()) """
+        # O(1)
+        self.number_of_filled_values = 0
 
-        # O(N^4) ???
-        self.missing_values = self.get_missing_values()
+        """ # O(N^4) ???
+        self.missing_values = self.get_missing_values() """
+        # O(1)
+        self.missing_values = []
+
+    def set_number_of_filled_values(self, number_of_filled_values):
+        self.number_of_filled_values = number_of_filled_values
+
+    def set_missing_values(self, missing_values):
+        self.missing_values = missing_values
     
     # O(1)
     def get_number(self, row: int, col: int) -> int:
@@ -202,6 +213,12 @@ class Board:
 
         # Criar e retornar board
         board = Board(lines_ints)
+
+        board.set_number_of_filled_values(len(board.get_filled_values()))
+
+        missing_values = board.get_missing_values()
+        board.set_missing_values(missing_values)
+
         return board
         
     # O(N^2)
@@ -415,6 +432,24 @@ class Board:
 
         return missing_values
 
+    # O(N^2)
+    def is_possible(self):
+        
+        # O(N^2)
+        for row in range(self.N):
+            for col in range(self.N):
+                
+                number = self.get_number(row, col)
+                if number != 0 and number != None:
+
+                    horizontal_adjacent = self.adjacent_horizontal_numbers(row, col)
+                    vertical_adjacent = self.adjacent_vertical_numbers(row, col)
+
+                    if not self.at_least_two_adjacent_numbers_are_sequential(number, horizontal_adjacent, vertical_adjacent):
+                        return False
+
+        return True
+
     def to_string(self):
         board_string = ""
 
@@ -493,7 +528,8 @@ class Numbrix(Problem):
         while actions == [] and choices < number_of_missing_values:
 
             actions = []
-            chosen_value = self.choose_value(missing_values, state)
+            """ chosen_value = self.choose_value(missing_values, state) """
+            chosen_value = random.choice(missing_values)
             choices += 1
 
             # O(N^2)
@@ -525,7 +561,6 @@ class Numbrix(Problem):
 
         missing_values = state.board.missing_values
         number_of_missing_values = len(missing_values)
-        choices = 0
 
         # se tabuleiro esta completamente preenchido
         if number_of_missing_values == 0:
@@ -637,7 +672,12 @@ class Numbrix(Problem):
         # heuristica 4: numero total de posicoes adjacentes vazias 
         #             + numero de posicoes vazias adjacentes 'a u'ltima jogada 
         #             + numero total de pecas vazias
-        return self.heuristic_4(node)
+        #return self.heuristic_4(node)
+
+        # heuristica 5: numero de posicoes vazias adjacentes 'a ultima jogada 
+        #             + numero total de pecas vazias
+        #             + compactness
+        return self.heuristic_5(node)
 
     # O(N^2)
     def heuristic_4(self, node):
@@ -671,7 +711,78 @@ class Numbrix(Problem):
             number_of_blank_adjacent_positions = 0
 
         number_of_missing_values = len(node.state.board.missing_values)
-        return total_number_of_blank_adjacent + number_of_blank_adjacent_positions + number_of_missing_values
+        return total_number_of_blank_adjacent * number_of_blank_adjacent_positions * number_of_missing_values
+
+    # O(N^2)
+    def heuristic_5(self, node):
+
+        if node.state.board.impossible_board == True:
+            return node.state.board.max * 100
+
+        """ # O(N^2)
+        blank_positions_adjacent_to_values = node.state.board.get_blank_positions_adjacent_to_values()
+        total_number_of_blank_adjacent = len(blank_positions_adjacent_to_values) """
+
+        # O(N^2)
+        compactness = self.get_compactness(node.state)
+
+        """ # O(N^2)
+        if not node.state.board.is_possible():
+            return node.state.board.max * 100 """
+
+        number_of_blank_adjacent_positions = 0
+
+        last_changed_position = node.state.board.last_changed_position
+        row = last_changed_position[0]
+        col = last_changed_position[1]
+
+        # O(1)
+        horizontal_numbers = node.state.board.adjacent_horizontal_numbers(row, col)
+        vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
+
+        # O(1)
+        for number in horizontal_numbers:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+        for number in vertical_numbers:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+
+        if last_changed_position == (-1, -1):
+            return node.state.board.max * 100
+            """ number_of_blank_adjacent_positions = 0 """
+
+        number_of_missing_values = len(node.state.board.missing_values)
+        return compactness * number_of_blank_adjacent_positions * number_of_missing_values
+
+    # O(N^2)
+    def get_compactness(self, state):
+
+        N = state.board.N
+        compactness = 0
+
+        # O(N^2)
+        for row in range(N):
+            for col in range(N):
+
+                if state.board.get_number(row, col) == 0:
+                    continue
+
+                # O(1)
+                adjacent_horizontal = state.board.adjacent_horizontal_numbers(row, col)
+                adjacent_vertical = state.board.adjacent_vertical_numbers(row, col)
+
+                # O(1)
+                for value in adjacent_horizontal:
+                    if value == 0:
+                        compactness += 1
+                for value in adjacent_vertical:
+                    if value == 0:
+                        compactness += 1
+
+        return compactness
+
+
         
 
 if __name__ == "__main__":
@@ -681,12 +792,12 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
 
     # Obter o nome do ficheiro do command line
-    input_file = sys.argv[1]
+    #input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
     #input_file = "i1.txt"
     #input_file = "i3.txt"
     #input_file = "i4.txt"
-    #input_file = "i5.txt"
+    input_file = "i5.txt"
     
     # Criar board
     board = Board.parse_instance(input_file) 
