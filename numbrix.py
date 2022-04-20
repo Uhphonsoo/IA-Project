@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v24
+#v26
 
 import sys
 import copy
@@ -474,7 +474,7 @@ class Numbrix(Problem):
 
     # O(N^2)
     # actions_vanilla
-    def actions(self, state: NumbrixState):
+    def actions_vanilla(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento. """
 
@@ -555,7 +555,7 @@ class Numbrix(Problem):
 
     # O(N^2)
     # actions_incremental
-    def actions_incremental(self, state: NumbrixState):
+    def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
         partir do estado passado como argumento. """
 
@@ -675,9 +675,13 @@ class Numbrix(Problem):
         #return self.heuristic_4(node)
 
         # heuristica 5: numero de posicoes vazias adjacentes 'a ultima jogada 
-        #             + numero total de pecas vazias
-        #             + compactness
-        return self.heuristic_5(node)
+        #             * numero total de pecas vazias
+        #             * compactness
+        #return self.heuristic_5(node)
+
+        # heuristica 6: compactness
+        #             / sequentialness
+        return self.heuristic_6(node)
 
     # O(N^2)
     def heuristic_4(self, node):
@@ -723,9 +727,6 @@ class Numbrix(Problem):
         blank_positions_adjacent_to_values = node.state.board.get_blank_positions_adjacent_to_values()
         total_number_of_blank_adjacent = len(blank_positions_adjacent_to_values) """
 
-        # O(N^2)
-        compactness = self.get_compactness(node.state)
-
         """ # O(N^2)
         if not node.state.board.is_possible():
             return node.state.board.max * 100 """
@@ -748,29 +749,93 @@ class Numbrix(Problem):
             if number == 0:
                 number_of_blank_adjacent_positions += 1
 
+        # O(N^2)
+        compactness = self.get_compactness(node.state)
+
         if last_changed_position == (-1, -1):
             return node.state.board.max * 100
             """ number_of_blank_adjacent_positions = 0 """
 
         number_of_missing_values = len(node.state.board.missing_values)
-        return compactness * number_of_blank_adjacent_positions * number_of_missing_values
+        #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
+        return compactness * number_of_missing_values
+
+    # O(N^2)
+    def heuristic_6(self, node):
+
+        if node.state.board.impossible_board == True:
+            return node.state.board.max * 100
+
+        number_of_blank_adjacent_positions = 0
+
+        last_changed_position = node.state.board.last_changed_position
+        row = last_changed_position[0]
+        col = last_changed_position[1]
+
+        # O(1)
+        horizontal_numbers = node.state.board.adjacent_horizontal_numbers(row, col)
+        vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
+
+        # O(1)
+        for number in horizontal_numbers:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+        for number in vertical_numbers:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+
+        # O(N^2)
+        compactness = self.get_compactness(node.state)
+
+        # O(N^2)
+        sequentialness = self.get_sequentialness(node.state)
+
+        if last_changed_position == (-1, -1):
+            return node.state.board.max * 100
+            """ number_of_blank_adjacent_positions = 0 """
+
+        number_of_missing_values = len(node.state.board.missing_values)
+        #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
+        #return compactness * number_of_missing_values
+        return compactness / sequentialness
 
     # O(N^2)
     def get_compactness(self, state):
 
         N = state.board.N
+        max = state.board.max
         compactness = 0
 
         # O(N^2)
         for row in range(N):
             for col in range(N):
-
-                if state.board.get_number(row, col) == 0:
+                
+                number_of_blank_adjacent_positions = 0
+                number = state.board.get_number(row, col)
+                if number == 0:
                     continue
 
                 # O(1)
                 adjacent_horizontal = state.board.adjacent_horizontal_numbers(row, col)
                 adjacent_vertical = state.board.adjacent_vertical_numbers(row, col)
+
+                # O(1)
+                for number_aux in adjacent_horizontal:
+                    if number_aux == 0:
+                        number_of_blank_adjacent_positions += 1
+                for number_aux in adjacent_vertical:
+                    if number_aux == 0:
+                        number_of_blank_adjacent_positions += 1
+
+                # O(1)
+                if number == 1 or number == max:
+                    if not state.board.at_least_one_adjacent_number_is_sequential(number, adjacent_horizontal, adjacent_vertical):
+                        state.board.is_possible = False
+                        return state.board.max * 100
+                if number_of_blank_adjacent_positions == 0:
+                    if not state.board.at_least_two_adjacent_numbers_are_sequential(number, adjacent_horizontal, adjacent_vertical):
+                        state.board.is_possible = False
+                        return state.board.max * 100
 
                 # O(1)
                 for value in adjacent_horizontal:
@@ -782,7 +847,38 @@ class Numbrix(Problem):
 
         return compactness
 
+    def get_sequentialness(self, state):
 
+        N = state.board.N
+        sequentialness = 0
+
+        # O(N^2)
+        for row in range(N):
+            for col in range(N):
+                
+                number = state.board.get_number(row, col)
+                if number == 0:
+                    continue
+
+                # O(1)
+                adjacent_horizontal = state.board.adjacent_horizontal_numbers(row, col)
+                adjacent_vertical = state.board.adjacent_vertical_numbers(row, col)
+
+                """ # O(1)
+                if number_of_blank_adjacent_positions == 0:
+                    if not state.board.at_least_two_adjacent_numbers_are_sequential(number, adjacent_horizontal, adjacent_vertical):
+                        state.board.is_possible = False
+                        return state.board.max * 100 """
+
+                # O(1)
+                for value in adjacent_horizontal:
+                    if value != 0 and (value == number + 1 or value == number - 1):
+                        sequentialness += 1
+                for value in adjacent_vertical:
+                    if value != 0 and (value == number + 1 or value == number - 1):
+                        sequentialness += 1
+
+        return sequentialness
         
 
 if __name__ == "__main__":
@@ -792,12 +888,12 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
 
     # Obter o nome do ficheiro do command line
-    #input_file = sys.argv[1]
+    input_file = sys.argv[1]
     #input_file = "tests_final_public/input2.txt"
     #input_file = "i1.txt"
     #input_file = "i3.txt"
     #input_file = "i4.txt"
-    input_file = "i5.txt"
+    #input_file = "i5.txt"
     
     # Criar board
     board = Board.parse_instance(input_file) 
