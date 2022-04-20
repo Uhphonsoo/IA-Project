@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v27
+#v30
 
 import sys
 import copy
@@ -685,7 +685,10 @@ class Numbrix(Problem):
         value = action[2]
 
         # O(N^2) ???
-        new_state = copy.deepcopy(state)
+        """ new_state = copy.deepcopy(state) """
+
+        new_board = copy.deepcopy(state.board)
+        new_state = NumbrixState(new_board)
 
         # O(N^2)
         new_state.set_board_value(row, col, value)
