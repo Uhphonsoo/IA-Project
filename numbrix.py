@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v26
+#v27
 
 import sys
 import copy
@@ -396,6 +396,17 @@ class Board:
 
         return at_least_one_adjacent_is_sequential
 
+    """ def number_1_is_adjacent(self, horizontal_adjacent_numbers, vertical_adjacent_numbers):
+
+        for number in horizontal_adjacent_numbers:
+            if number == 1:
+                return True
+        for number in vertical_adjacent_numbers:
+            if number == 1:
+                return True
+
+        return False """
+
     # O(1)
     def at_least_two_adjacent_numbers_are_sequential(self, current_number, horizontal_adjacent_numbers, vertical_adjacent_numbers):
 
@@ -449,6 +460,30 @@ class Board:
                         return False
 
         return True
+
+    # O(N^2)
+    def get_position_by_value(self, value):
+
+        # O(N^2)
+        for row in range(self.N):
+            for col in range(self.N):
+                if self.get_number(row, col) == value:
+                    return [row, col]
+
+    # O(1)
+    def get_distance_between_positions(self, position1, position2):
+
+        if position1 == (-1, -1):
+            return self.max * 100
+
+        distance_x = abs(position1[0] - position2[0])
+        distance_y = abs(position1[1] - position2[1])
+        distance = distance_x + distance_y
+
+        if distance == 0:
+            return 1
+
+        return distance_x + distance_y
 
     def to_string(self):
         board_string = ""
@@ -681,7 +716,12 @@ class Numbrix(Problem):
 
         # heuristica 6: compactness
         #             / sequentialness
-        return self.heuristic_6(node)
+        #return self.heuristic_6(node)
+
+        # heuristica 7: compactness
+        #             * distancia da ultima jogada ao valor mais proximo
+        #             / sequentialness
+        return self.heuristic_7(node)
 
     # O(N^2)
     def heuristic_4(self, node):
@@ -800,6 +840,46 @@ class Numbrix(Problem):
         return compactness / sequentialness
 
     # O(N^2)
+    def heuristic_7(self, node):
+
+        if node.state.board.impossible_board == True:
+            return node.state.board.max * 100
+
+        number_of_blank_adjacent_positions = 0
+
+        last_changed_position = node.state.board.last_changed_position
+        row = last_changed_position[0]
+        col = last_changed_position[1]
+
+        # O(1)
+        horizontal_numbers = node.state.board.adjacent_horizontal_numbers(row, col)
+        vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
+
+        # O(1)
+        for number in horizontal_numbers:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+        for number in vertical_numbers:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+
+        # O(N^2)
+        compactness = self.get_compactness(node.state)
+        # O(N^2)
+        sequentialness = self.get_sequentialness(node.state)
+        # O(N^2)
+        distance = self.distance_from_last_changed_position_to_closest_value(node.state)
+
+        if last_changed_position == (-1, -1):
+            return node.state.board.max * 100
+            """ number_of_blank_adjacent_positions = 0 """
+
+        number_of_missing_values = len(node.state.board.missing_values)
+        #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
+        #return compactness * number_of_missing_values
+        return compactness * distance / sequentialness
+
+    # O(N^2)
     def get_compactness(self, state):
 
         N = state.board.N
@@ -828,6 +908,10 @@ class Numbrix(Problem):
                         number_of_blank_adjacent_positions += 1
 
                 # O(1)
+                """ if number == 0 and number_of_blank_adjacent_positions == 0:
+                    if not state.board.number_1_is_adjacent(adjacent_horizontal, adjacent_vertical):
+                        state.board.is_possible = False
+                        return state.board.max * 100 """
                 if number == 1 or number == max:
                     if not state.board.at_least_one_adjacent_number_is_sequential(number, adjacent_horizontal, adjacent_vertical):
                         state.board.is_possible = False
@@ -879,7 +963,39 @@ class Numbrix(Problem):
                         sequentialness += 1
 
         return sequentialness
+
+    # O(N^2)
+    def distance_from_last_changed_position_to_closest_value(self, state):
+
+        missing_values = state.board.missing_values
+        last_set_value = state.board.last_set_value
+        last_chaged_position = state.board.last_changed_position
+        max = state.board.max
+
+        if len(missing_values) == 0:
+            return 0
         
+        closest_value = missing_values[0]
+        minimum_difference = abs(last_set_value - closest_value)
+
+        # find closest value
+        # O(N^2)
+        for value in range(1, max + 1):
+            if value in missing_values:
+                continue
+            if abs(value - last_set_value) < minimum_difference:
+                minimum_difference = abs(value - last_set_value)
+                closest_value = value
+
+        # find position ([row, col]) of closest value
+        # O(N^2)
+        closest_position = state.board.get_position_by_value(closest_value)
+
+        # get distance
+        # O(1)
+        distance = state.board.get_distance_between_positions(last_chaged_position, closest_position)
+        return distance
+           
 
 if __name__ == "__main__":
     # Ler o ficheiro de input de sys.argv[1],
