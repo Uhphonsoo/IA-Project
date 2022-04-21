@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v33
+#v34
 
 import sys
 import copy
@@ -471,7 +471,7 @@ class Board:
                     return [row, col]
 
     # O(1)
-    def get_distance_between_positions(self, position1, position2):
+    def distance_between_positions(self, position1, position2):
 
         if position1 == (-1, -1):
             return self.max * 100
@@ -889,13 +889,16 @@ class Numbrix(Problem):
     def heuristic_7(self, node):
 
         if node.state.board.impossible_board == True:
-            return node.state.board.max * 100
+            return float('inf')
 
         number_of_blank_adjacent_positions = 0
 
         last_changed_position = node.state.board.last_changed_position
         row = last_changed_position[0]
         col = last_changed_position[1]
+
+        if last_changed_position == (-1, -1):
+            return float('inf')
 
         # O(1)
         horizontal_numbers = node.state.board.adjacent_horizontal_numbers(row, col)
@@ -905,6 +908,10 @@ class Numbrix(Problem):
         number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(horizontal_numbers, vertical_numbers)
 
         # O(N^2)
+        if not self.acceptable_distance_to_all_filled_values(node):
+            return float('inf')
+
+        # O(N^2)
         compactness = self.get_compactness(node.state)
         # O(N^2)
         sequentialness = self.get_sequentialness(node.state)
@@ -912,12 +919,36 @@ class Numbrix(Problem):
         distance = self.distance_from_last_changed_position_to_closest_value(node.state)
 
         if last_changed_position == (-1, -1):
-            return node.state.board.max * 100
+            return float('inf')
 
         number_of_missing_values = len(node.state.board.missing_values)
         #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
         #return compactness * number_of_missing_values
         return compactness * distance / sequentialness
+
+    # O(N^2)
+    def acceptable_distance_to_all_filled_values(self, node):
+        
+        N = node.state.board.N
+        board = node.state.board
+        last_set_value = board.last_set_value
+        last_changed_position = board.last_changed_position
+
+        # O(N^2)
+        for row in range(N):
+            for col in range(N):
+                
+                number = board.get_number(row, col)
+                if number == 0 or number == last_set_value:
+                    continue
+
+                difference = abs(last_set_value - number)
+                distance = board.distance_between_positions([row, col], last_changed_position)
+
+                if distance > difference:
+                    return False
+        return True
+
 
     # O(N^2)
     def get_compactness(self, state):
@@ -1028,7 +1059,7 @@ class Numbrix(Problem):
 
         # get distance
         # O(1)
-        distance = state.board.get_distance_between_positions(last_chaged_position, closest_position)
+        distance = state.board.distance_between_positions(last_chaged_position, closest_position)
         return distance
 
     # O(1)
