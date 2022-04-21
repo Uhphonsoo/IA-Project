@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v34
+#v38
 
 import sys
 import copy
@@ -905,7 +905,7 @@ class Numbrix(Problem):
         vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
 
         # O(1)
-        number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(horizontal_numbers, vertical_numbers)
+        """ number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(horizontal_numbers, vertical_numbers) """
 
         # O(N^2)
         if not self.acceptable_distance_to_all_filled_values(node):
@@ -916,7 +916,7 @@ class Numbrix(Problem):
         # O(N^2)
         sequentialness = self.get_sequentialness(node.state)
         # O(N^2)
-        distance = self.distance_from_last_changed_position_to_closest_value(node.state)
+        """ distance = self.distance_from_last_changed_position_to_closest_value(node.state) """
 
         if last_changed_position == (-1, -1):
             return float('inf')
@@ -924,7 +924,9 @@ class Numbrix(Problem):
         number_of_missing_values = len(node.state.board.missing_values)
         #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
         #return compactness * number_of_missing_values
-        return compactness * distance / sequentialness
+        #return compactness * distance / sequentialness
+        return compactness / sequentialness
+        #return compactness
 
     # O(N^2)
     def acceptable_distance_to_all_filled_values(self, node):
