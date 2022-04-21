@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v30
+#v33
 
 import sys
 import copy
@@ -485,6 +485,15 @@ class Board:
 
         return distance_x + distance_y
 
+    # O(values.N)
+    def get_difference_to_all_values(self, target, values):
+
+        difference = 0
+        for value in values:
+            difference += abs(value - target)
+
+        return difference
+
     def to_string(self):
         board_string = ""
 
@@ -552,6 +561,7 @@ class Numbrix(Problem):
         missing_values = state.board.missing_values
         number_of_missing_values = len(missing_values)
         choices = 0
+        choice_values = missing_values[:]
 
         # se tabuleiro esta completamente preenchido
         if number_of_missing_values == 0:
@@ -559,21 +569,37 @@ class Numbrix(Problem):
 
         actions = []
         N = state.board.N
+        max = state.board.max
 
+        # < O(N^4)
         while actions == [] and choices < number_of_missing_values:
 
             actions = []
-            """ chosen_value = self.choose_value(missing_values, state) """
-            chosen_value = random.choice(missing_values)
+
+            # < O(N^2)
+            chosen_value = self.choose_value(choice_values, state)
+            choice_values.remove(chosen_value)
             choices += 1
 
             # O(N^2)
             for row in range(N):
                 for col in range(N):
 
-                    if state.board.get_number(row, col) == 0:
+                    number = state.board.get_number(row, col)
+                    if number == 0:
+
+                        if self.test_sequence(chosen_value, row, col, state):
+                            action = self.createAction((row, col), chosen_value)
+                            actions.append(action)
+                            return actions
+
                         horizontal_adjacent = state.board.adjacent_horizontal_numbers(row, col)
                         vertical_adjacent = state.board.adjacent_vertical_numbers(row, col)
+
+                        number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(horizontal_adjacent, vertical_adjacent)
+                        if number_of_blank_adjacent_positions == 0 and number != 1 and number != max:
+                            if not state.board.at_least_two_adjacent_numbers_are_sequential(chosen_value, horizontal_adjacent, vertical_adjacent):
+                                continue
 
                         if state.board.at_least_one_adjacent_number_is_sequential(chosen_value, horizontal_adjacent, vertical_adjacent):
                             action = self.createAction((row, col), chosen_value)
@@ -603,6 +629,7 @@ class Numbrix(Problem):
 
         actions = []
         N = state.board.N
+        max = state.board.max
 
         for missing_value in missing_values:
 
@@ -611,15 +638,22 @@ class Numbrix(Problem):
             # O(N^2)
             for row in range(N):
                 for col in range(N):
+                    
+                    number = state.board.get_number(row, col)
+                    if number == 0:
 
-                    if self.test_sequence(missing_value, row, col, state):
-                        action = self.createAction((row, col), missing_value)
-                        actions.append(action)
-                        return actions
+                        if self.test_sequence(missing_value, row, col, state):
+                            action = self.createAction((row, col), missing_value)
+                            actions.append(action)
+                            return actions
 
-                    if state.board.get_number(row, col) == 0:
                         horizontal_adjacent = state.board.adjacent_horizontal_numbers(row, col)
                         vertical_adjacent = state.board.adjacent_vertical_numbers(row, col)
+
+                        number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(horizontal_adjacent, vertical_adjacent)
+                        if number_of_blank_adjacent_positions == 0 and number != 1 and number != max:
+                            if not state.board.at_least_two_adjacent_numbers_are_sequential(missing_value, horizontal_adjacent, vertical_adjacent):
+                                continue
 
                         if state.board.at_least_one_adjacent_number_is_sequential(missing_value, horizontal_adjacent, vertical_adjacent):
                             action = self.createAction((row, col), missing_value)
@@ -657,17 +691,26 @@ class Numbrix(Problem):
 
         return False
 
-    """ # O(N^2)
-    def choose_value(self, missing_values, state):
+    # O(N^2)
+    def choose_value(self, choice_values, state):
+
+        # O(N^2)
+        filled_values = state.board.get_filled_values()
         
-        N = state.board.N
-        for row in range(N):
-            for col in range(N):
-                if state.board.get_number(row, col) == 
+        if len(choice_values) > 0:
+            min_value = choice_values[0]
 
-        horizontal_adjacent
-        for value in missing_values: """
+            # O(N^2)
+            min_diff = state.board.get_difference_to_all_values(min_value, filled_values)
 
+        # O(N^2) (choice_values.N + filled_values.N <= N^2)
+        for value in choice_values:
+            this_diff = state.board.get_difference_to_all_values(value, filled_values)
+            if this_diff < min_diff:
+                min_value = value
+                min_diff = this_diff
+
+        return min_value
 
     # O(1)
     def createAction(self, position, possibleValue):
@@ -859,12 +902,7 @@ class Numbrix(Problem):
         vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
 
         # O(1)
-        for number in horizontal_numbers:
-            if number == 0:
-                number_of_blank_adjacent_positions += 1
-        for number in vertical_numbers:
-            if number == 0:
-                number_of_blank_adjacent_positions += 1
+        number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(horizontal_numbers, vertical_numbers)
 
         # O(N^2)
         compactness = self.get_compactness(node.state)
@@ -875,7 +913,6 @@ class Numbrix(Problem):
 
         if last_changed_position == (-1, -1):
             return node.state.board.max * 100
-            """ number_of_blank_adjacent_positions = 0 """
 
         number_of_missing_values = len(node.state.board.missing_values)
         #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
@@ -903,12 +940,7 @@ class Numbrix(Problem):
                 adjacent_vertical = state.board.adjacent_vertical_numbers(row, col)
 
                 # O(1)
-                for number_aux in adjacent_horizontal:
-                    if number_aux == 0:
-                        number_of_blank_adjacent_positions += 1
-                for number_aux in adjacent_vertical:
-                    if number_aux == 0:
-                        number_of_blank_adjacent_positions += 1
+                number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(adjacent_horizontal, adjacent_vertical)
 
                 # O(1)
                 """ if number == 0 and number_of_blank_adjacent_positions == 0:
@@ -998,7 +1030,19 @@ class Numbrix(Problem):
         # O(1)
         distance = state.board.get_distance_between_positions(last_chaged_position, closest_position)
         return distance
-           
+
+    # O(1)
+    def get_number_of_blank_adjacent_positions(self, adjacent_horizontal, adjacent_vertical):
+
+        number_of_blank_adjacent_positions = 0
+        for number in adjacent_horizontal:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+        for number in adjacent_vertical:
+            if number == 0:
+                number_of_blank_adjacent_positions += 1
+
+        return number_of_blank_adjacent_positions
 
 if __name__ == "__main__":
     # Ler o ficheiro de input de sys.argv[1],
@@ -1008,11 +1052,11 @@ if __name__ == "__main__":
 
     # Obter o nome do ficheiro do command line
     input_file = sys.argv[1]
-    #input_file = "tests_final_public/input2.txt"
     #input_file = "i1.txt"
     #input_file = "i3.txt"
     #input_file = "i4.txt"
     #input_file = "i5.txt"
+    #input_file = "tests_final_public/input2.txt"
     
     # Criar board
     board = Board.parse_instance(input_file) 
