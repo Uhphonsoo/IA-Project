@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v40
+#v43
 
 import sys
 import copy
@@ -282,7 +282,7 @@ class Board:
         return self
 
     # O(N^2) v
-    def goal_test(self):
+    def goal_test_old(self):
 
         goal = True
 
@@ -309,6 +309,10 @@ class Board:
                     return False
 
         return goal
+
+    def goal_test(self):
+
+        return self.missing_values == []
 
     # O(1) v
     def at_least_one_adjacent_number_is_sequential(self, current_number, horizontal_adjacent_numbers, vertical_adjacent_numbers):
