@@ -2,12 +2,12 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v43
+#v46
 
 import sys
 import copy
 import random
-from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, depth_first_tree_search, greedy_search, recursive_best_first_search
+from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, compare_searchers, depth_first_tree_search, greedy_search, recursive_best_first_search
 
 
 class NumbrixState:
@@ -1016,13 +1016,23 @@ if __name__ == "__main__":
     # Criar uma instância de Numbrix:
     problem = Numbrix(board)
 
+    # Criar uma instancia de InstrumentedProblem
+    instrumentedProblem = InstrumentedProblem(problem)
+
+    # Comparar estatisticas
+    #compare_searchers([problem], "teste", [greedy_search, astar_search])
+
+    """ [breadth_first_tree_search,
+                                        depth_first_tree_search,
+                                        recursive_best_first_search,
+                                        greedy_search,
+                                        astar_search] """
+
     # Obter o nó solução usando a procura A*:
-    #goal_node = astar_search(problem)
-    goal_node = greedy_search(problem)
     #goal_node = breadth_first_tree_search(problem)
     #goal_node = depth_first_tree_search(problem)
+    goal_node = greedy_search(problem)
+    #goal_node = astar_search(problem)
 
     # Verificar se foi atingida a solução
-    """ print("Is goal?", problem.goal_test(goal_node.state))
-    print("Solution:\n", goal_node.state.board.to_string(), sep="") """
-    print(goal_node.state.board.to_string())
+    #print(goal_node.state.board.to_string())
