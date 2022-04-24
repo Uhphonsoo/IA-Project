@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v48
+#v49
 
 import sys
 import copy
@@ -70,8 +70,6 @@ class Board:
         # O(1)
         self.number_of_filled_values = 0
 
-        """ # O(N^4) ???
-        self.missing_values = self.get_missing_values() """
         # O(1)
         self.missing_values = []
 
@@ -153,6 +151,7 @@ class Board:
             line_ints = [int(string_number) for string_number in line.split()]
             lines_ints.append(line_ints)
 
+        # O(N)
         # Criar e retornar board
         board = Board(lines_ints)
 
@@ -310,6 +309,7 @@ class Board:
 
         return goal
 
+    # O(1)
     def goal_test(self):
 
         return self.missing_values == []
@@ -658,7 +658,7 @@ class Numbrix(Problem):
 
         return new_state
 
-    # O(N^2) v
+    # O(1) v
     def goal_test(self, state: NumbrixState):
         """ Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro 
