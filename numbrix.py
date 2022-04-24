@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v47
+#v48
 
 import sys
 import copy
@@ -575,7 +575,7 @@ class Numbrix(Problem):
                             actions.append(action)
 
             if actions != []:
-                break
+                return actions
 
         return actions
 
