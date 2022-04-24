@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v49
+#v51
 
 import sys
 import copy
@@ -845,6 +845,7 @@ class Numbrix(Problem):
         #return compactness * number_of_missing_values
         #return compactness * distance / sequentialness
         return compactness / sequentialness
+        #return 1 / sequentialness
         #return compactness
 
     # O(N^2) v
