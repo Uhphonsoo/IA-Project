@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v54
+#v55
 
 import sys
 import copy
@@ -161,70 +161,58 @@ class Board:
         # O(N^4)
         missing_values = board.get_missing_values()
 
+        sorted_missing_values = board.sort_missing_values(missing_values)
+
         # O(1)
-        board.set_missing_values(missing_values)
+        board.set_missing_values(sorted_missing_values)
 
         return board
 
-    """ Retorna uma lista em que cada elemento e' composto por uma 
-        posicao vazia que esteja adjacente a pelo menos uma posicao nao
-        vazia (posicao com um valor) e por o conjunto de valores que 
-        lhe sao adjacentes """
-    # O(N^2)
-    """ def get_blank_positions_adjacent_to_values(self):
+    def sort_missing_values(self, missing_values):
+
+        N = self.N
+        first_filled_value = self.get_first_filled_value()
+
+        smaller_values = self.get_smaller_values(first_filled_value, missing_values)
+        greater_values = self.get_greater_values(first_filled_value, missing_values)
+
+        smaller_values.sort(reverse = True)
+        greater_values.sort()
+
+        return smaller_values + greater_values
+
+    def get_first_filled_value(self):
+
+        N = self.N
+        first_filled_value = 0
+
+        for row in range(N):
+            for col in range(N):
+                number = self.get_number(row, col)
+                if number != 0:
+                    return number
+
+        return -1
         
-        blankPositionsAdjacentToValues = []
+    def get_smaller_values(self, number, values):
 
-        # O(N^2)
-        for line in range(self.N):
-            for col in range(self.N):
-                adjacentValuesOfThisPosition = set()
+        smaller_values = []
 
-                if self.lines[line][col] != 0: # se a posicao nao esta vazia
-                    continue
-                else:
-                    adjacentToNonBlankPosition = False
-                    verticalAdjacentValues = self.adjacent_vertical_numbers(line, col)
-                    horizontalAdjacentValues = self.adjacent_horizontal_numbers(line, col)
+        for value in values:
+            if value < number:
+                smaller_values.append(value)
+        
+        return smaller_values
 
-                    # O(1)
-                    for verticalValue in verticalAdjacentValues:
-                        if verticalValue != 0 and verticalValue != None:
-                            adjacentToNonBlankPosition = True
-                            adjacentValuesOfThisPosition.add(verticalValue)
+    def get_greater_values(self, number, values):
 
-                    # O(1)
-                    for horizontalValue in horizontalAdjacentValues:
-                        if horizontalValue != 0 and horizontalValue != None:
-                            adjacentToNonBlankPosition = True
-                            adjacentValuesOfThisPosition.add(horizontalValue)
-                    
-                    if adjacentToNonBlankPosition:
-                        blankPositionsAdjacentToValues.append([(line, col), adjacentValuesOfThisPosition])
-                        
-        return blankPositionsAdjacentToValues """
+        greater_values = []
 
-    # O(1)
-    """ def get_number_of_blank_positions_adjacent_to_position(self, position):
-
-        row = position[0]
-        col = position[1]
-
-        number_of_blank_positions = 0
-
-        # O(1)
-        horizontal_values = self.adjacent_horizontal_numbers(row, col)
-        vertical_values = self.adjacent_vertical_numbers(row, col)
-
-        # O(1)
-        for value in horizontal_values:
-            if value != None and value == 0:
-                number_of_blank_positions += 1
-        for value in vertical_values:
-            if value != None and value == 0:
-                number_of_blank_positions += 1
-
-        return number_of_blank_positions """
+        for value in values:
+            if value > number:
+                greater_values.append(value)
+        
+        return greater_values
 
     # O(N^2) v
     def get_filled_values(self):
@@ -670,139 +658,8 @@ class Numbrix(Problem):
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
 
-        # heuristica 4: numero total de posicoes adjacentes vazias 
-        #             + numero de posicoes vazias adjacentes 'a u'ltima jogada 
-        #             + numero total de pecas vazias
-        #return self.heuristic_4(node)
-
-        # heuristica 5: numero de posicoes vazias adjacentes 'a ultima jogada 
-        #             * numero total de pecas vazias
-        #             * compactness
-        #return self.heuristic_5(node)
-
-        # heuristica 6: compactness
-        #             / sequentialness
-        #return self.heuristic_6(node)
-
         # O(N^2)
-        # heuristica 7: compactness
-        #             * distancia da ultima jogada ao valor mais proximo
-        #             / sequentialness
-        return self.heuristic_7(node)
-
-    # O(N^2)
-    """ def heuristic_4(self, node):
-
-        if node.state.board.impossible_board == True:
-            return node.state.board.max * 100
-
-        # O(N^2)
-        blank_positions_adjacent_to_values = node.state.board.get_blank_positions_adjacent_to_values()
-        total_number_of_blank_adjacent = len(blank_positions_adjacent_to_values)
-
-        number_of_blank_adjacent_positions = 0
-
-        last_changed_position = node.state.board.last_changed_position
-        row = last_changed_position[0]
-        col = last_changed_position[1]
-
-        # O(1)
-        horizontal_numbers = node.state.board.adjacent_horizontal_numbers(row, col)
-        vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
-
-        # O(1)
-        for number in horizontal_numbers:
-            if number == 0:
-                number_of_blank_adjacent_positions += 1
-        for number in vertical_numbers:
-            if number == 0:
-                number_of_blank_adjacent_positions += 1
-
-        if last_changed_position == (-1, -1):
-            number_of_blank_adjacent_positions = 0
-
-        number_of_missing_values = len(node.state.board.missing_values)
-        return total_number_of_blank_adjacent * number_of_blank_adjacent_positions * number_of_missing_values """
-
-    # O(N^2)
-    def heuristic_5(self, node):
-
-        if node.state.board.impossible_board == True:
-            return node.state.board.max * 100
-
-        """ # O(N^2)
-        blank_positions_adjacent_to_values = node.state.board.get_blank_positions_adjacent_to_values()
-        total_number_of_blank_adjacent = len(blank_positions_adjacent_to_values) """
-
-        # O(N^2)
-        if not node.state.board.is_possible():
-            return node.state.board.max * 100
-
-        number_of_blank_adjacent_positions = 0
-
-        last_changed_position = node.state.board.last_changed_position
-        row = last_changed_position[0]
-        col = last_changed_position[1]
-
-        # O(1)
-        horizontal_numbers = node.state.board.adjacent_horizontal_numbers(row, col)
-        vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
-
-        # O(1)
-        for number in horizontal_numbers:
-            if number == 0:
-                number_of_blank_adjacent_positions += 1
-        for number in vertical_numbers:
-            if number == 0:
-                number_of_blank_adjacent_positions += 1
-
-        # O(N^2)
-        compactness = self.get_compactness(node.state)
-
-        if last_changed_position == (-1, -1):
-            return node.state.board.max * 100
-
-        number_of_missing_values = len(node.state.board.missing_values)
-        #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
-        return compactness * number_of_missing_values
-
-    # O(N^2)
-    """ def heuristic_6(self, node):
-
-        if node.state.board.impossible_board == True:
-            return node.state.board.max * 100
-
-        number_of_blank_adjacent_positions = 0
-
-        last_changed_position = node.state.board.last_changed_position
-        row = last_changed_position[0]
-        col = last_changed_position[1]
-
-        # O(1)
-        horizontal_numbers = node.state.board.adjacent_horizontal_numbers(row, col)
-        vertical_numbers = node.state.board.adjacent_vertical_numbers(row, col)
-
-        # O(1)
-        for number in horizontal_numbers:
-            if number == 0:
-                number_of_blank_adjacent_positions += 1
-        for number in vertical_numbers:
-            if number == 0:
-                number_of_blank_adjacent_positions += 1
-
-        # O(N^2)
-        compactness = self.get_compactness(node.state)
-
-        # O(N^2)
-        sequentialness = self.get_sequentialness(node.state)
-
-        if last_changed_position == (-1, -1):
-            return node.state.board.max * 100
-
-        number_of_missing_values = len(node.state.board.missing_values)
-        #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
-        #return compactness * number_of_missing_values
-        return compactness / sequentialness """
+        return self.heuristic_7(node)    
 
     # O(N^2) v
     def heuristic_7(self, node):
@@ -1006,6 +863,7 @@ if __name__ == "__main__":
     # Obter o nome do ficheiro do command line
     input_file = sys.argv[1]
     #input_file = "i1.txt"
+    #input_file = "i2.txt"
     #input_file = "i3.txt"
     #input_file = "i4.txt"
     #input_file = "i5.txt"
