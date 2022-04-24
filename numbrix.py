@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v46
+#v47
 
 import sys
 import copy
@@ -1017,16 +1017,12 @@ if __name__ == "__main__":
     problem = Numbrix(board)
 
     # Criar uma instancia de InstrumentedProblem
-    instrumentedProblem = InstrumentedProblem(problem)
+    #instrumentedProblem = InstrumentedProblem(problem)
 
     # Comparar estatisticas
     #compare_searchers([problem], "teste", [greedy_search, astar_search])
-
-    """ [breadth_first_tree_search,
-                                        depth_first_tree_search,
-                                        recursive_best_first_search,
-                                        greedy_search,
-                                        astar_search] """
+    #compare_searchers([problem], "teste", [greedy_search, astar_search, recursive_best_first_search])
+    #compare_searchers([problem], "teste", [breadth_first_tree_search, depth_first_tree_search, greedy_search, astar_search])
 
     # Obter o nó solução usando a procura A*:
     #goal_node = breadth_first_tree_search(problem)
@@ -1035,4 +1031,4 @@ if __name__ == "__main__":
     #goal_node = astar_search(problem)
 
     # Verificar se foi atingida a solução
-    #print(goal_node.state.board.to_string())
+    print(goal_node.state.board.to_string())
