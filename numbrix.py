@@ -2,7 +2,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v55
+#v56
 
 import sys
 import copy
@@ -446,6 +446,7 @@ class Numbrix(Problem):
         # O(N^2)
         self.initial = NumbrixState(copy.deepcopy(board))
         self.number_of_actions = 0
+        self.last_number_of_actions = float('inf')
 
     # O(N^2)
     # actions_choice
@@ -563,8 +564,10 @@ class Numbrix(Problem):
                             actions.append(action)
 
             if actions != []:
+                self.last_number_of_actions = len(actions)
                 return actions
 
+        self.last_number_of_actions = len(actions)
         return actions
 
     # O(1) v
@@ -659,7 +662,9 @@ class Numbrix(Problem):
         """ Função heuristica utilizada para a procura A*. """
 
         # O(N^2)
-        return self.heuristic_7(node)    
+        return self.heuristic_7(node)
+
+        #return self.heuristic_l(node)
 
     # O(N^2) v
     def heuristic_7(self, node):
@@ -704,6 +709,58 @@ class Numbrix(Problem):
         return compactness / sequentialness
         #return 1 / sequentialness
         #return compactness
+
+    # O(N^2) v
+    def heuristic_l(self, node):
+
+        board = node.state.board
+        state = node.state
+        missing_values = board.missing_values
+        number_of_missing_values = len(missing_values)
+        last_number_of_actions = self.last_number_of_actions
+        number_of_sequences = self.get_number_of_sequences(state)
+        sequentialness = self.get_sequentialness(node.state)
+        compactness = self.get_compactness(node.state)
+
+        return number_of_missing_values * last_number_of_actions * compactness / number_of_sequences
+
+    # O(N^2) v
+    def get_number_of_sequences(self, state):
+
+        board = state.board
+        N = board.N
+        Max = board.max
+        number_of_sequences = 0
+
+        # O(N^2)
+        for row in range(N):
+            for col in range(N):
+
+                current_number = board.get_number(row, col)
+                if current_number == 0:
+                    continue
+
+                horizontal_adjacent = board.adjacent_horizontal_numbers(row, col)
+                vertical_adjacent = board.adjacent_vertical_numbers(row, col)
+                adjacent = horizontal_adjacent + vertical_adjacent
+
+                if current_number == 1:
+                    for number in adjacent:
+                        if number == 2:
+                            number_of_sequences += 1
+                elif current_number == Max:
+                    for number in adjacent:
+                        if number == Max - 1:
+                            number_of_sequences += 1
+                else:
+                    for number in adjacent:
+                        if number == current_number - 1 or number == current_number + 1:
+                            number_of_sequences += 1
+
+        if number_of_sequences == 0:
+            number_of_sequences = 1
+
+        return number_of_sequences
 
     # O(N^2) v
     def acceptable_distance_to_all_filled_values(self, node):
