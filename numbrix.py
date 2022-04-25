@@ -2,12 +2,12 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v56
+#v63
 
 import sys
 import copy
-import random
 from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, compare_searchers, depth_first_tree_search, greedy_search, recursive_best_first_search
+from utils import distance
 
 
 class NumbrixState:
@@ -373,33 +373,6 @@ class Board:
 
         return missing_values
 
-    # O(N^2)
-    """ def is_possible(self):
-        
-        # O(N^2)
-        for row in range(self.N):
-            for col in range(self.N):
-                
-                number = self.get_number(row, col)
-                if number != 0 and number != None:
-
-                    horizontal_adjacent = self.adjacent_horizontal_numbers(row, col)
-                    vertical_adjacent = self.adjacent_vertical_numbers(row, col)
-
-                    if not self.at_least_two_adjacent_numbers_are_sequential(number, horizontal_adjacent, vertical_adjacent):
-                        return False
-
-        return True """
-
-    # O(N^2) v
-    """ def get_position_by_value(self, value):
-
-        # O(N^2)
-        for row in range(self.N):
-            for col in range(self.N):
-                if self.get_number(row, col) == value:
-                    return [row, col] """
-
     # O(1) v
     def distance_between_positions(self, position1, position2):
 
@@ -423,6 +396,39 @@ class Board:
             difference += abs(value - target)
 
         return difference
+
+    # O(N^2)
+    def acceptable_distance_to_all_filled_values(self, value, position):
+
+        N = self.N
+
+        # O(N^2)
+        for row in range(N):
+            for col in range(N):
+                
+                number = self.get_number(row, col)
+                if number == 0:
+                    continue
+                
+                difference = abs(value - number)
+                distance = self.distance_between_positions(position, (row, col))
+                if distance > difference:
+                    return False
+
+        return True
+
+    # O(N^2)
+    def get_filled_values_dict(self):
+
+        filled_values_dict = {}
+
+        N = board.N
+        for row in range(N):
+            for col in range(N):
+                number = self.get_number(row, col)
+                if number != 0:
+                    filled_values_dict[number] = (row, col)
+        return filled_values_dict
 
     def to_string(self):
         board_string = ""
@@ -448,69 +454,7 @@ class Numbrix(Problem):
         self.number_of_actions = 0
         self.last_number_of_actions = float('inf')
 
-    # O(N^2)
-    # actions_choice
-    """ Retorna uma lista de ações que podem ser executadas a
-        partir do estado passado como argumento. """
-    """ def actions_choice(self, state: NumbrixState):
-
-        missing_values = state.board.missing_values
-        number_of_missing_values = len(missing_values)
-        choices = 0
-        choice_values = missing_values[:]
-
-        # se tabuleiro esta completamente preenchido
-        if number_of_missing_values == 0:
-            return []
-
-        actions = []
-        N = state.board.N
-        max = state.board.max
-
-        # < O(N^4)
-        while actions == [] and choices < number_of_missing_values:
-
-            actions = []
-
-            # < O(N^2)
-            chosen_value = self.choose_value(choice_values, state)
-            choice_values.remove(chosen_value)
-            choices += 1
-
-            # O(N^2)
-            for row in range(N):
-                for col in range(N):
-
-                    number = state.board.get_number(row, col)
-                    if number == 0:
-
-                        if self.test_sequence(chosen_value, row, col, state):
-                            action = self.createAction((row, col), chosen_value)
-                            actions.append(action)
-                            return actions
-
-                        horizontal_adjacent = state.board.adjacent_horizontal_numbers(row, col)
-                        vertical_adjacent = state.board.adjacent_vertical_numbers(row, col)
-
-                        number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(horizontal_adjacent, vertical_adjacent)
-                        if number_of_blank_adjacent_positions == 0 and number != 1 and number != max:
-                            if not state.board.at_least_two_adjacent_numbers_are_sequential(chosen_value, horizontal_adjacent, vertical_adjacent):
-                                continue
-
-                        if state.board.at_least_one_adjacent_number_is_sequential(chosen_value, horizontal_adjacent, vertical_adjacent):
-                            action = self.createAction((row, col), chosen_value)
-                            actions.append(action)
-
-            if actions != []:
-                break
-
-            # no more choices for chosen value
-            if choices == number_of_missing_values:
-                break
-
-        return actions """
-
-    # O(N^4) v
+    # O(N^2) v (por causa da ordenação inicial de missing_values)
     # actions_incremental
     def actions(self, state: NumbrixState):
         """ Retorna uma lista de ações que podem ser executadas a
@@ -529,7 +473,7 @@ class Numbrix(Problem):
         N = state.board.N
         max = state.board.max
 
-        # O(N^4)
+        # O(N^2) (por causa da ordenação inicial de missing_values)
         for missing_value in missing_values: # O(N^2)
 
             actions = []
@@ -569,6 +513,112 @@ class Numbrix(Problem):
 
         self.last_number_of_actions = len(actions)
         return actions
+
+    # actions_novo
+    def actions_(self, state: NumbrixState):
+        """ Retorna uma lista de ações que podem ser executadas a
+        partir do estado passado como argumento. """
+
+        missing_values = state.board.missing_values
+
+        # O(N^2)
+        filled_values_dict = state.board.get_filled_values_dict()
+
+        # O(1)
+        number_of_missing_values = len(missing_values)
+
+        # se tabuleiro esta completamente preenchido
+        if number_of_missing_values == 0:
+            return []
+
+        actions = []
+        N = state.board.N
+        max = state.board.max
+
+        # O(N^2) (por causa da ordenação inicial de missing_values)
+        for missing_value in missing_values: # O(1) (por causa da ordenação inicial de missing_values)
+
+            actions = []
+
+            # O(1)
+            possible_positions = self.get_possible_positions(missing_value, filled_values_dict, state)
+
+            for possible_position in possible_positions: # O(1)
+                row = possible_position[0]
+                col = possible_position[1]
+                
+                # O(1)
+                if self.test_sequence(missing_value, row, col, state):
+                    action = self.createAction((row, col), missing_value)
+                    actions.append(action)
+                    return actions
+
+                # O(1)
+                horizontal_adjacent = state.board.adjacent_horizontal_numbers(row, col)
+                vertical_adjacent = state.board.adjacent_vertical_numbers(row, col)
+
+                # O(1)
+                number_of_blank_adjacent_positions = self.get_number_of_blank_adjacent_positions(horizontal_adjacent, vertical_adjacent)
+                if number_of_blank_adjacent_positions == 0:
+                    if not state.board.at_least_two_adjacent_numbers_are_sequential(missing_value, horizontal_adjacent, vertical_adjacent):
+                        continue
+
+                # O(N^2)
+                if not state.board.acceptable_distance_to_all_filled_values(missing_value, (row, col)):
+                    continue
+                
+                # O(1)
+                #if state.board.at_least_one_adjacent_number_is_sequential(missing_value, horizontal_adjacent, vertical_adjacent):
+                action = self.createAction((row, col), missing_value)
+                actions.append(action)
+
+            if actions != []:
+                self.last_number_of_actions = len(actions)
+                return actions
+
+        self.last_number_of_actions = len(actions)
+        return actions
+
+    # O(1) v
+    def get_possible_positions(self, missing_value, filled_values_dict, state):
+
+        board = state.board
+        maximum = board.max
+        N = board.N
+        possible_positions = []
+
+        if missing_value == 1:
+            values_to_look_for = [2]
+        elif missing_value == max:
+            values_to_look_for = [max - 1]
+        else:
+            values_to_look_for = [missing_value - 1, missing_value + 1]
+
+        for value in values_to_look_for: # O(1)
+
+            if value in filled_values_dict:
+                position = filled_values_dict[value]
+                row = position[0]
+                col = position[1]
+
+                if row - 1 >= 0:
+                    number = board.get_number(row - 1, col)
+                    if number == 0:
+                        possible_positions.append((row - 1, col))
+                if col - 1 >= 0:
+                    number = board.get_number(row, col - 1)
+                    if number == 0:
+                        possible_positions.append((row, col - 1))
+                if row + 1 < N:
+                    number = board.get_number(row + 1, col)
+                    if number == 0:
+                        possible_positions.append((row + 1, col))
+                if col + 1 < N:
+                    number = board.get_number(row, col + 1)
+                    if number == 0:
+                        possible_positions.append((row, col + 1))
+
+        return possible_positions
 
     # O(1) v
     def test_sequence(self, missing_value, row, col, state):
@@ -678,6 +728,7 @@ class Numbrix(Problem):
         row = last_changed_position[0]
         col = last_changed_position[1]
 
+        # root state
         if last_changed_position == (-1, -1):
             return float('inf')
 
@@ -695,9 +746,11 @@ class Numbrix(Problem):
         # O(N^2)
         compactness = self.get_compactness(node.state)
         # O(N^2)
-        sequentialness = self.get_sequentialness(node.state)
+        #sequentialness = self.get_sequentialness(node.state)
         # O(N^2)
         """ distance = self.distance_from_last_changed_position_to_closest_value(node.state) """
+         # O(N^2)
+        number_of_sequences = self.get_number_of_sequences(node.state)
 
         if last_changed_position == (-1, -1):
             return float('inf')
@@ -706,7 +759,8 @@ class Numbrix(Problem):
         #return compactness * number_of_blank_adjacent_positions * number_of_missing_values
         #return compactness * number_of_missing_values
         #return compactness * distance / sequentialness
-        return compactness / sequentialness
+        #return compactness / sequentialness
+        return compactness / number_of_sequences
         #return 1 / sequentialness
         #return compactness
 
@@ -719,7 +773,7 @@ class Numbrix(Problem):
         number_of_missing_values = len(missing_values)
         last_number_of_actions = self.last_number_of_actions
         number_of_sequences = self.get_number_of_sequences(state)
-        sequentialness = self.get_sequentialness(node.state)
+        #sequentialness = self.get_sequentialness(node.state)
         compactness = self.get_compactness(node.state)
 
         return number_of_missing_values * last_number_of_actions * compactness / number_of_sequences
