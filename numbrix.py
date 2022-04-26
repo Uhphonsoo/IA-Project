@@ -1,11 +1,16 @@
+# numbrix.py: Template para implementação do projeto de Inteligência Artificial 2021/2022.
+# Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
+# Além das funções e classes já definidas, podem acrescentar outras que considerem pertinentes.
+
 # Grupo 39:
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#v64
+#versao semi-final
 
 import sys
 import copy
+import time
 from search import InstrumentedProblem, Problem, Node, astar_search, breadth_first_tree_search, compare_searchers, depth_first_tree_search, greedy_search, recursive_best_first_search
 from utils import distance
 
@@ -55,22 +60,15 @@ class Board:
 
         # a primeira linha de linhas e' da forma [N]
         N = lines[0][0]
-
         self.N = N
 
         # O(N)
         self.lines = lines[1:]
         self.max = N**2
-
         self.last_changed_position = (-1, -1)
         self.last_set_value = 0
-
         self.impossible_board = False
-
-        # O(1)
         self.number_of_filled_values = 0
-
-        # O(1)
         self.missing_values = []
 
     # O(1) v
@@ -157,35 +155,40 @@ class Board:
 
         # O(N^2)
         board.set_number_of_filled_values(len(board.get_filled_values()))
-
         # O(N^4)
         missing_values = board.get_missing_values()
-
+        # O(N^2)
         sorted_missing_values = board.sort_missing_values(missing_values)
-
         # O(1)
         board.set_missing_values(sorted_missing_values)
 
         return board
 
+    # O(N^2) v
     def sort_missing_values(self, missing_values):
 
         N = self.N
+
+        # O(N^2)
         first_filled_value = self.get_first_filled_value()
 
+        # O(N^2)
         smaller_values = self.get_smaller_values(first_filled_value, missing_values)
         greater_values = self.get_greater_values(first_filled_value, missing_values)
 
+        # O(N^2)
         smaller_values.sort(reverse = True)
         greater_values.sort()
 
         return smaller_values + greater_values
 
+    # O(N^2) v
     def get_first_filled_value(self):
 
         N = self.N
         first_filled_value = 0
 
+        # O(N^2)
         for row in range(N):
             for col in range(N):
                 number = self.get_number(row, col)
@@ -193,17 +196,20 @@ class Board:
                     return number
 
         return -1
-        
+    
+    # O(N^2) v
     def get_smaller_values(self, number, values):
 
         smaller_values = []
 
+        # O(N^2)
         for value in values:
             if value < number:
                 smaller_values.append(value)
         
         return smaller_values
 
+    # O(N^2) v
     def get_greater_values(self, number, values):
 
         greater_values = []
@@ -267,35 +273,6 @@ class Board:
                 self.impossible_board = True
                 
         return self
-
-    # O(N^2) v
-    def goal_test_old(self):
-
-        goal = True
-
-        # O(N^2)
-        for row in range(self.N):
-            for col in range(self.N):
-
-                # O(1)
-                horizontal_adjacent_numbers = self.adjacent_horizontal_numbers(row, col)
-                vertical_adjacent_numbers = self.adjacent_vertical_numbers(row, col)
-
-                # if a single position is empty then this is not a goal state
-                if self.lines[row][col] == 0:
-                    return False
-
-                # if not a single adjacent number is sequential then this is not a goal state
-                # O(1)
-                if not self.at_least_one_adjacent_number_is_sequential(self.lines[row][col], horizontal_adjacent_numbers, vertical_adjacent_numbers):
-                    return False
-
-                # if for a number != 1 and != N**2 no two sequential numbers are adjacent then this is not a goal state 
-                # O(1)
-                if not self.at_least_two_adjacent_numbers_are_sequential(self.lines[row][col], horizontal_adjacent_numbers, vertical_adjacent_numbers):
-                    return False
-
-        return goal
 
     # O(1)
     def goal_test(self):
@@ -387,35 +364,6 @@ class Board:
             return 1
 
         return distance_x + distance_y
-
-    # O(N^2) v (values.len == N^2)
-    def get_difference_to_all_values(self, target, values):
-
-        difference = 0
-        for value in values:
-            difference += abs(value - target)
-
-        return difference
-
-    # O(N^2)
-    def acceptable_distance_to_all_filled_values(self, value, position):
-
-        N = self.N
-
-        # O(N^2)
-        for row in range(N):
-            for col in range(N):
-                
-                number = self.get_number(row, col)
-                if number == 0:
-                    continue
-                
-                difference = abs(value - number)
-                distance = self.distance_between_positions(position, (row, col))
-                if distance > difference:
-                    return False
-
-        return True
 
     # O(N^2)
     def get_filled_values_dict(self):
@@ -598,11 +546,11 @@ class Numbrix(Problem):
             return float('inf')
 
         # O(N^2)
-        spareseness = self.get_compactness(node.state)
-         # O(N^2)
+        sparceseness = self.get_compactness(node.state)
+        # O(N^2)
         number_of_sequences = self.get_number_of_sequences(node.state)
 
-        return spareseness / number_of_sequences
+        return  sparceseness / number_of_sequences
 
     # O(N^2) v
     def get_number_of_sequences(self, state):
@@ -661,7 +609,7 @@ class Numbrix(Problem):
                 difference = abs(last_set_value - number)
                 distance = board.distance_between_positions([row, col], last_changed_position)
 
-                if distance > difference:
+                if distance > difference or distance % 2 != difference % 2:
                     return False
         return True
 
@@ -709,34 +657,6 @@ class Numbrix(Problem):
 
         return compactness
 
-    # O(N^2) v
-    def get_sequentialness(self, state):
-
-        N = state.board.N
-        sequentialness = 0
-
-        # O(N^2)
-        for row in range(N):
-            for col in range(N):
-                
-                number = state.board.get_number(row, col)
-                if number == 0:
-                    continue
-
-                # O(1)
-                adjacent_horizontal = state.board.adjacent_horizontal_numbers(row, col)
-                adjacent_vertical = state.board.adjacent_vertical_numbers(row, col)
-
-                # O(1)
-                for value in adjacent_horizontal:
-                    if value != 0 and (value == number + 1 or value == number - 1):
-                        sequentialness += 1
-                for value in adjacent_vertical:
-                    if value != 0 and (value == number + 1 or value == number - 1):
-                        sequentialness += 1
-
-        return sequentialness
-
     # O(1) v
     def get_number_of_blank_adjacent_positions(self, adjacent_horizontal, adjacent_vertical):
 
@@ -758,32 +678,29 @@ if __name__ == "__main__":
 
     # Obter o nome do ficheiro do command line
     input_file = sys.argv[1]
-    #input_file = "i1.txt"
-    #input_file = "i2.txt"
-    #input_file = "i3.txt"
-    #input_file = "i4.txt"
-    #input_file = "i5.txt"
-    #input_file = "tests_final_public/input2.txt"
     
+    # Start time
+    #start_time = time.time()
+
     # Criar board
     board = Board.parse_instance(input_file) 
 
     # Criar uma instância de Numbrix:
     problem = Numbrix(board)
 
-    # Criar uma instancia de InstrumentedProblem
-    #instrumentedProblem = InstrumentedProblem(problem)
-
-    # Comparar estatisticas
-    #compare_searchers([problem], "teste", [greedy_search, astar_search])
-    #compare_searchers([problem], "teste", [greedy_search, astar_search, recursive_best_first_search])
-    #compare_searchers([problem], "teste", [breadth_first_tree_search, depth_first_tree_search, greedy_search, astar_search])
-
     # Obter o nó solução usando a procura A*:
     #goal_node = breadth_first_tree_search(problem)
     #goal_node = depth_first_tree_search(problem)
     goal_node = greedy_search(problem)
     #goal_node = astar_search(problem)
+
+    #print("--- %s seconds ---" % (time.time() - start_time))
+
+    # Criar uma instancia de InstrumentedProblem
+    #instrumentedProblem = InstrumentedProblem(problem)
+
+    # Comparar estatisticas
+    #compare_searchers([problem], "testes", [breadth_first_tree_search, depth_first_tree_search, greedy_search, astar_search])
 
     # Verificar se foi atingida a solução
     print(goal_node.state.board.to_string())
