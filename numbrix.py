@@ -6,7 +6,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#versao semi-final
+#versao semi-final_v3
 
 import sys
 import copy
@@ -56,20 +56,16 @@ class Board:
 
     # O(N) v
     """ Representação interna de um tabuleiro de Numbrix. """
-    def __init__(self, lines):
+    def __init__(self, lines, last_changed_position, last_set_value, impossible_board, number_of_filled_values, missing_values):
 
-        # a primeira linha de linhas e' da forma [N]
-        N = lines[0][0]
-        self.N = N
-
-        # O(N)
+        self.N = lines[0][0]
+        self.max = self.N**2
         self.lines = lines[1:]
-        self.max = N**2
-        self.last_changed_position = (-1, -1)
-        self.last_set_value = 0
-        self.impossible_board = False
-        self.number_of_filled_values = 0
-        self.missing_values = []
+        self.last_changed_position = last_changed_position
+        self.last_set_value = last_set_value
+        self.impossible_board = impossible_board
+        self.number_of_filled_values = number_of_filled_values
+        self.missing_values = missing_values
 
     # O(1) v
     def set_number_of_filled_values(self, number_of_filled_values):
@@ -151,7 +147,8 @@ class Board:
 
         # O(N)
         # Criar e retornar board
-        board = Board(lines_ints)
+        board = Board(lines_ints, (-1, -1), 0, False, 0, [])
+        #board = Board(lines_ints)
 
         # O(N^2)
         board.set_number_of_filled_values(len(board.get_filled_values()))
@@ -398,7 +395,7 @@ class Numbrix(Problem):
     def __init__(self, board: Board):
         """ O construtor especifica o estado inicial. """
         # O(N^2)
-        self.initial = NumbrixState(copy.deepcopy(board))
+        self.initial = NumbrixState(board)
         self.number_of_actions = 0
         self.last_number_of_actions = float('inf')
 
@@ -507,7 +504,24 @@ class Numbrix(Problem):
         value = action[2]
 
         # O(N^2)
-        new_board = copy.deepcopy(state.board)
+        lines = state.board.lines
+        new_lines = [[state.board.N]]
+        for line in lines:
+            new_line = []
+            for element in line:
+                new_line.append(element)
+            new_lines.append(new_line)
+
+        # O(N^2)
+        missing_values = state.board.missing_values
+        new_missing_values = []
+        for value_aux in missing_values:
+            new_missing_values.append(value_aux)
+
+        # O(N^2)
+        board = state.board
+        #new_board = copy.deepcopy(state.board)
+        new_board = Board(new_lines, board.last_changed_position, board.last_set_value, board.impossible_board, board.number_of_filled_values, new_missing_values)
         # O(1)
         new_state = NumbrixState(new_board)
         # O(N^2)
