@@ -6,7 +6,7 @@
 # 90398 Joao Silva
 # 95633 Maria Varanda
 
-#versao semi-final_v3
+#versao final
 
 import sys
 import copy
